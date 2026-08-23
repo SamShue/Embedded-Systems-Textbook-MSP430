@@ -14,6 +14,16 @@ build the book and should not be edited going forward &mdash; new/updated
 chapter content should be written directly in the `.qmd` files under
 [`book/chapters/`](book/chapters/).
 
+## Companion books
+
+A companion book, "Embedded Systems with STM32", covers the same general
+topics for the STM32 platform. It's maintained as a separate repository
+(rather than in this one) since the two target different microcontroller
+families and most chapter content &mdash; peripheral registers, memory
+maps, toolchain &mdash; is platform-specific and doesn't translate directly
+between them. It reuses the same Quarto project layout and
+`scripts/convert_docx_to_qmd.py` conversion pattern established here.
+
 ## Repository layout
 
 ```
