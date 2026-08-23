@@ -1,0 +1,29 @@
+# Preface {.unnumbered}
+
+This book is an introduction to embedded systems programming using the
+Texas Instruments MSP430G2553 microcontroller and the MSP-EXP430G2ET
+LaunchPad development board.
+
+It is intended for readers who are new to embedded systems, and covers
+the fundamentals of microcontrollers, C programming for resource-constrained
+targets, general purpose input/output (GPIO), embedded programming
+patterns, timers, analog-to-digital conversion, and serial communication.
+
+## How this book is organized
+
+The book is split into parts, each grouping related chapters:
+
+- **Foundations** &mdash; what an embedded system is, and the C programming
+  concepts needed to work with one.
+- **Digital I/O and Program Structure** &mdash; controlling GPIO pins and
+  structuring larger embedded programs (hardware abstraction layers, state
+  machines, interrupts).
+- **Peripherals** &mdash; timers, analog-to-digital conversion (ADC), and
+  serial communication.
+
+## Source material
+
+This book is adapted from an earlier Microsoft Word draft of the same
+material. The original drafts and supporting diagram source files (`.pptx`)
+are kept for reference under `Archive/TI-MSP430G2553/`. See the project
+[README](../README.md) for details on how this Quarto version was produced.
