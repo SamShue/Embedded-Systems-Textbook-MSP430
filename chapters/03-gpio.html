@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>3&nbsp; General Purpose Input/Output (GPIO) – Embedded Systems with the MSP430G2553</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/04-embedded-programming.html" rel="next">
+<link href="../chapters/02-c-programming.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-0a572480b27ed01c8e16a5ad86456bc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/03-gpio.html">Digital I/O and Program Structure</a></li><li class="breadcrumb-item"><a href="../chapters/03-gpio.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">General Purpose Input/Output (GPIO)</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Embedded Systems with the MSP430G2553</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-c-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">C Programming</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Digital I/O and Program Structure</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-gpio.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">General Purpose Input/Output (GPIO)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-embedded-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Embedded Programming</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Peripherals</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-timers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timers</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-adc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Analog-to-Digital Conversion (ADC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-serial-communication.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Serial Communication</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives"><span class="header-section-number">3.1</span> Learning Objectives</a></li>
+  <li><a href="#interfacing-with-the-outside-world" id="toc-interfacing-with-the-outside-world" class="nav-link" data-scroll-target="#interfacing-with-the-outside-world"><span class="header-section-number">3.2</span> Interfacing with the Outside World</a></li>
+  <li><a href="#general-purpose-input-output" id="toc-general-purpose-input-output" class="nav-link" data-scroll-target="#general-purpose-input-output"><span class="header-section-number">3.3</span> General Purpose Input Output</a>
+  <ul class="collapse">
+  <li><a href="#controlling-an-led" id="toc-controlling-an-led" class="nav-link" data-scroll-target="#controlling-an-led"><span class="header-section-number">3.3.1</span> Controlling an LED</a></li>
+  <li><a href="#reading-a-button-press" id="toc-reading-a-button-press" class="nav-link" data-scroll-target="#reading-a-button-press"><span class="header-section-number">3.3.2</span> Reading a Button Press</a></li>
+  <li><a href="#peripherals-and-the-memory-map" id="toc-peripherals-and-the-memory-map" class="nav-link" data-scroll-target="#peripherals-and-the-memory-map"><span class="header-section-number">3.3.3</span> Peripherals and the Memory Map</a></li>
+  <li><a href="#the-msp430fr2355-memory-map" id="toc-the-msp430fr2355-memory-map" class="nav-link" data-scroll-target="#the-msp430fr2355-memory-map"><span class="header-section-number">3.3.4</span> The MSP430FR2355 Memory Map</a></li>
+  <li><a href="#the-msp430g2553-gpio-peripheral" id="toc-the-msp430g2553-gpio-peripheral" class="nav-link" data-scroll-target="#the-msp430g2553-gpio-peripheral"><span class="header-section-number">3.3.5</span> The MSP430G2553 GPIO Peripheral</a></li>
+  <li><a href="#which-pins-have-gpio" id="toc-which-pins-have-gpio" class="nav-link" data-scroll-target="#which-pins-have-gpio"><span class="header-section-number">3.3.6</span> Which pins have GPIO?</a></li>
+  </ul></li>
+  <li><a href="#controlling-the-gpio" id="toc-controlling-the-gpio" class="nav-link" data-scroll-target="#controlling-the-gpio"><span class="header-section-number">3.4</span> Controlling the GPIO</a>
+  <ul class="collapse">
+  <li><a href="#direction-register" id="toc-direction-register" class="nav-link" data-scroll-target="#direction-register"><span class="header-section-number">3.4.1</span> Direction Register</a></li>
+  <li><a href="#output-register" id="toc-output-register" class="nav-link" data-scroll-target="#output-register"><span class="header-section-number">3.4.2</span> Output Register</a></li>
+  <li><a href="#input-register" id="toc-input-register" class="nav-link" data-scroll-target="#input-register"><span class="header-section-number">3.4.3</span> Input Register</a></li>
+  <li><a href="#pullup-or-pulldown-resistor-enable-register" id="toc-pullup-or-pulldown-resistor-enable-register" class="nav-link" data-scroll-target="#pullup-or-pulldown-resistor-enable-register"><span class="header-section-number">3.4.4</span> Pullup or Pulldown Resistor Enable Register</a></li>
+  <li><a href="#the-gpio-hardware" id="toc-the-gpio-hardware" class="nav-link" data-scroll-target="#the-gpio-hardware"><span class="header-section-number">3.4.5</span> The GPIO Hardware</a></li>
+  <li><a href="#example-setting-an-led" id="toc-example-setting-an-led" class="nav-link" data-scroll-target="#example-setting-an-led"><span class="header-section-number">3.4.6</span> Example: Setting an LED</a></li>
+  <li><a href="#example-reading-a-button-press" id="toc-example-reading-a-button-press" class="nav-link" data-scroll-target="#example-reading-a-button-press"><span class="header-section-number">3.4.7</span> Example: Reading a Button Press</a></li>
+  <li><a href="#example-reading-a-button-press-and-setting-an-led" id="toc-example-reading-a-button-press-and-setting-an-led" class="nav-link" data-scroll-target="#example-reading-a-button-press-and-setting-an-led"><span class="header-section-number">3.4.8</span> Example Reading a Button Press and Setting an LED</a></li>
+  <li><a href="#going-further-beyond" id="toc-going-further-beyond" class="nav-link" data-scroll-target="#going-further-beyond"><span class="header-section-number">3.4.9</span> Going Further Beyond</a></li>
+  </ul></li>
+  <li><a href="#register-macros" id="toc-register-macros" class="nav-link" data-scroll-target="#register-macros"><span class="header-section-number">3.5</span> Register Macros</a></li>
+  <li><a href="#bit-masking" id="toc-bit-masking" class="nav-link" data-scroll-target="#bit-masking"><span class="header-section-number">3.6</span> Bit Masking</a>
+  <ul class="collapse">
+  <li><a href="#bit-masking-for-inputs" id="toc-bit-masking-for-inputs" class="nav-link" data-scroll-target="#bit-masking-for-inputs"><span class="header-section-number">3.6.1</span> Bit Masking for Inputs</a></li>
+  <li><a href="#understanding-the-problem" id="toc-understanding-the-problem" class="nav-link" data-scroll-target="#understanding-the-problem"><span class="header-section-number">3.6.2</span> Understanding the Problem</a></li>
+  <li><a href="#creating-a-bit-mask" id="toc-creating-a-bit-mask" class="nav-link" data-scroll-target="#creating-a-bit-mask"><span class="header-section-number">3.6.3</span> Creating a Bit Mask</a></li>
+  <li><a href="#bit-masking-for-setting-bits" id="toc-bit-masking-for-setting-bits" class="nav-link" data-scroll-target="#bit-masking-for-setting-bits"><span class="header-section-number">3.6.4</span> Bit Masking for Setting Bits</a></li>
+  <li><a href="#and-and-or-assignment-operators" id="toc-and-and-or-assignment-operators" class="nav-link" data-scroll-target="#and-and-or-assignment-operators"><span class="header-section-number">3.6.5</span> AND and OR Assignment Operators</a></li>
+  <li><a href="#creating-bit-masks" id="toc-creating-bit-masks" class="nav-link" data-scroll-target="#creating-bit-masks"><span class="header-section-number">3.6.6</span> Creating Bit Masks</a></li>
+  </ul></li>
+  <li><a href="#example-application-led-button-press" id="toc-example-application-led-button-press" class="nav-link" data-scroll-target="#example-application-led-button-press"><span class="header-section-number">3.7</span> Example Application: LED Button Press</a></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap"><span class="header-section-number">3.8</span> Recap</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/03-gpio.html">Digital I/O and Program Structure</a></li><li class="breadcrumb-item"><a href="../chapters/03-gpio.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">General Purpose Input/Output (GPIO)</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">General Purpose Input/Output (GPIO)</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="learning-objectives" class="level2" data-number="3.1">
+<h2 data-number="3.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">3.1</span> Learning Objectives</h2>
+<p>In this chapter we will learn:</p>
+<ul>
+<li><p>What peripherals are</p></li>
+<li><p>What General Purpose Input/Output is</p></li>
+<li><p>How to control peripherals by writing to registers</p></li>
+<li><p>Bit masking</p></li>
+<li><p>Functionalizing code</p></li>
+</ul>
+</section>
+<section id="interfacing-with-the-outside-world" class="level2" data-number="3.2">
+<h2 data-number="3.2" class="anchored" data-anchor-id="interfacing-with-the-outside-world"><span class="header-section-number">3.2</span> Interfacing with the Outside World</h2>
+<p>When we introduced the basic components of a computer in Chapter 1, we mentioned they have five primary components: Memory, ALU, Control, Input, and Output. For any computer to have any use, it must have some way to interface with a user, which is the purpose of the input and output components. On your desktop or laptop computer, you may think of these as physical components, such as your keyboard, mouse, monitor, speakers, etc. These are of course necessary for you to interact with your computer.</p>
+<p>For an embedded system, being able to interface with another system is of upmost importance and may require less-obvious needs. Embedded systems may need to interface with another circuit by reading a digital voltage and interpreting it into a 1 or 0. They may need to read an analog voltage and convert it into a digital value for processing, such as reading the signal from a microphone. They may need to interface with another microcontroller and communicate using a specific protocol. Given all of these possible input and output needs an embedded system might have, how are these interfaces created? The answer comes in the form of a <strong>peripheral</strong>. A peripheral is a separate hardware component included in the microcontroller’s architecture to perform some task, typically providing one of these input or output interfaces.</p>
+</section>
+<section id="general-purpose-input-output" class="level2" data-number="3.3">
+<h2 data-number="3.3" class="anchored" data-anchor-id="general-purpose-input-output"><span class="header-section-number">3.3</span> General Purpose Input Output</h2>
+<p>Let’s focus on the most fundamental peripheral found in nearly every single microcontroller, the <strong>General-Purpose Input Output</strong> (GPIO). The GPIO peripheral allows the microcontroller to read or set digital voltages on certain pins of the chip. This allows the microcontroller to create some of the most basic forms of inputs and outputs, such as illuminating an LED or reading a button press.</p>
+<p>First, let’s recall what is meant my “digital” voltage. A digital voltage is a voltage that represents either a 1 or a 0. How these 1’s and 0’s are represented may vary depending on the microcontroller, but for the most part, a 0 is represented by 0 volts, and a 1 is represented by the operating voltage of the microcontroller, which tends to be either 5 or 3.3 volts. When speaking ambiguously about these voltages, we will often use the terms <strong>high</strong> and <strong>low</strong> voltages to refer to whatever the voltage is that represents a 1 and a 0 in the system, respectively. The microcontroller will interpret any voltage that is near those values as such, but voltages that fall in between may be up to the microcontroller’s interpretation and should avoided when using GPIO.</p>
+<div id="fig-ch03-3-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image110.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.1: Example of a Digital Signal
+</figcaption>
+</figure>
+</div>
+<p>&lt;Note: Modify image to show “gray” areas between digital values. Change “On” and “Off” to voltage values&gt;</p>
+<section id="controlling-an-led" class="level3" data-number="3.3.1">
+<h3 data-number="3.3.1" class="anchored" data-anchor-id="controlling-an-led"><span class="header-section-number">3.3.1</span> Controlling an LED</h3>
+<p>As mentioned before, these digital signals can be used to apply either high or low voltages to the external pins of the microcontroller. We can connect these pins to external circuits to do things such as illuminate an LED or read a button press. Let’s consider an example of illuminating an LED using the GPIO pin of a microcontroller. Let’s say we have generic microcontroller with a GPIO peripheral that controls a pin labeled “P1”. Attached to P1 we have a small resistor in series with an LED, which is then connected to ground, as shown in Figure 3.2.</p>
+<div id="fig-ch03-3-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image21.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.2: Example GPIO LED application
+</figcaption>
+</figure>
+</div>
+<p>When the GPIO provides a high voltage on P1, a current is generated which flows from P1, through the resistor, then the LED, then to ground. When current flows through the LED, it emits light. If the GPIO writes a low voltage to P1, which low is typically always 0 for GPIO, we now have no electrical potential across the LED, as the voltage on ground is also 0. For current to flow, a path from a higher voltage to a lower voltage must be provided, and here we have none, so the LED turns off.</p>
+</section>
+<section id="reading-a-button-press" class="level3" data-number="3.3.2">
+<h3 data-number="3.3.2" class="anchored" data-anchor-id="reading-a-button-press"><span class="header-section-number">3.3.2</span> Reading a Button Press</h3>
+<p>Let’s consider another common GPIO application, reading a button press. To read a button press, we need to have a switch that can control when a high or low voltage is presented to the GPIO input pin. We’ll use the same generic microcontroller as in the previous example, but this time P1 will be used to read the voltage rather than produce a voltage. We’ll connect P1 to a resistor that is wired to a high voltage source, and also to a switch which will connect the pin to ground, which can be see in Figure 3.3.</p>
+<div id="fig-ch03-3-3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image30.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.3: Example GPIO LED application
+</figcaption>
+</figure>
+</div>
+<p>When the switch is closed, P1 is directly connected to ground, and will read 0 volts; all the voltage is dissipated across the resistor in this scenario as well, and none of the current flows into the microcontroller through P1. When the switch is open, there is no longer a direct path to ground, and the current is forced to flow into P1 and through the microcontroller. The input for GPIO pins tends to be of an extremely high resistance, and therefore most of the voltage is dissipated through the microcontroller. This means that only a very small (negligible) amount is lost across the resistor and P1 reads a high voltage.</p>
+<p>We’ve now covered the two most fundamental input/output scenarios for an embedded system. This is good in theory, but how do we achieve this on the MSP430FR2355? Let’s learn how to control the GPIO on this microcontroller.</p>
+</section>
+<section id="peripherals-and-the-memory-map" class="level3" data-number="3.3.3">
+<h3 data-number="3.3.3" class="anchored" data-anchor-id="peripherals-and-the-memory-map"><span class="header-section-number">3.3.3</span> Peripherals and the Memory Map</h3>
+<p>From the perspective of an individual instruction, there are only two things a line of code can control: the operation (add, subtract, etc.) and the memory location it writes the result. So, in order to control these peripherals using program instructions, they need to appear like memory locations so the instructions can write to them. Each peripheral contains many <strong>control registers</strong>, which are just like any other memory unit, except the data written to these registers will dictate how that peripheral behaves. For GPIO, that might be indicating whether a pin is an input or output, whether we write a high or a low to a pin, or if we read a high or low on a pin.</p>
+<div id="fig-ch03-3-4" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image40.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.4: Generic Example of Memory Mapped Peripherals
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-msp430fr2355-memory-map" class="level3" data-number="3.3.4">
+<h3 data-number="3.3.4" class="anchored" data-anchor-id="the-msp430fr2355-memory-map"><span class="header-section-number">3.3.4</span> The MSP430FR2355 Memory Map</h3>
+<p>Microcontroller programming is heavily centered around reading and writing to peripheral control registers. Therefore, the memory map is very important to the programmer developing code for the microcontroller. Each microcontroller has a different memory map, so to know where our control registers reside in memory, we will need to consult the datasheet or user’s manual to find out. A <strong>datasheet</strong> is an accompanying document that describes many of the physical characteristics of the microcontroller, such as physical dimensions of the packaging, pinout descriptions, electrical characteristics, etc. Sometimes the datasheet may contain information about the memory map, but for TI products, the user’s manual contains this information. The <strong>user’s guide</strong> has detailed descriptions of the microcontroller’s architecture, memory map, and peripherals; essentially everything the programmer needs to know to use the microcontroller. We’ll learn that much of embedded systems involves reading user’s guides and datasheets to understand how to integrate various existing components into our designs.</p>
+<p>The MSP430G2553’s memory map can be seen in Figure 3.6. In this figure, we see the memory map’s regions divided up into various address ranges. Some of the regions we’ve encountered before aren’t present here, such as data, BSS, and stack, and are all simply listed as RAM. Since these regions are all regions that can be written to at runtime, their boundaries are defined by software and not the hardware itself. The compiler is responsible for setting those boundaries and creating instructions that behave within them. This diagram shows boundaries that have some important physical hardware connections, such as the peripherals. We can see in this diagram what memory locations belong to peripherals.</p>
+<p><img src="../images/ch03/image50.png" style="width:2.16498in;height:2.59102in" alt="A table with numbers and letters Description automatically generated"><img src="../images/ch03/image50.png" style="width:1.44104in;height:2.63794in" alt="A table with numbers and letters Description automatically generated"></p>
+<div id="fig-ch03-3-6" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image60.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.5: MSP430G2553 memory map
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-msp430g2553-gpio-peripheral" class="level3" data-number="3.3.5">
+<h3 data-number="3.3.5" class="anchored" data-anchor-id="the-msp430g2553-gpio-peripheral"><span class="header-section-number">3.3.5</span> The MSP430G2553 GPIO Peripheral</h3>
+<p>The MSP430G2553 has a fairly standard GPIO peripheral. The TI documentation refers to it as simply “Digital I/O”, but this is still a general-purpose input/output peripheral. The MSP430G2553 has a 40-pin chip, and many of these pins can be controlled by the GPIO peripheral. However, the GPIO peripheral itself can only manage up to 16 pins per module, so the architecture includes three individual GPIO peripherals, allowing control over nearly every pin, excluding the pins for power and ground. Three GPIO units can potentially control up to 48 pins, but since the package only has 40, some of these are unused.</p>
+<p>Figure 3.7 shows the block diagram of the MSP430G2553 architecture. This diagram contains a lot of items we aren’t familiar with yet, but it does contain some that we can identify, based on our understanding of the five basic components of a computer. To the far left, we can see a block labeled “16-MHz CPU including 16 registers”. This is the processor (ALU and control) component of the computer. That means everything else must be classified as input/output or memory. We mentioned earlier, that to control the input/output, or peripherals as we now know them, they must appear as memory addresses. Figure 3.6 indicated this by illustrating control registers as locations within a contiguous block of memory. This is how the hardware might “appear” to the instructions; but in reality, these memory addresses are spread out across multiple hardware components, such as our GPIO modules. They appear as memory addresses due to the fact they are wired into the memory bus. The <strong>memory bus</strong> is what connects all components to the memory map, often accompanied by a memory bus controller. When the processor reads or writes to a location, that location is accessed through this bus, whether it’s actual RAM or a peripheral control register. We can identify our three GPIO peripherals in Figure 3.7 as the blocks in the top right of the diagram labeled “I/O Ports”.</p>
+<div id="fig-ch03-3-7" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image70.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.6: MSP430G2553 Functional Block Diagram
+</figcaption>
+</figure>
+</div>
+<p>We see that each GPIO peripheral has a different nomenclature describing the module. Each module is referred to as “Port” followed by a number. At the top right of the diagram in Figure 3.7, we see a GPIO module called “Port P3”. Each port controls 8 GPIO pins each.</p>
+</section>
+<section id="which-pins-have-gpio" class="level3" data-number="3.3.6">
+<h3 data-number="3.3.6" class="anchored" data-anchor-id="which-pins-have-gpio"><span class="header-section-number">3.3.6</span> Which pins have GPIO?</h3>
+<p>From here you might be wondering, which pins do each of these ports control? And that is a question that has to be answered by the datasheet. Within that document, it will identify which pins on the package are connected to which ports on the GPIO module. Some microcontrollers might come in different package sizes as well, so it’s important to consult the documentation for this. Figure 3.8 shows an excerpt from the datasheet indicating the pinout of the chip. On this diagram, we will notice each pin has many different acronyms associated with it. This is because apart from the GPIO, several of the pins might share a connection with some other peripherals. We can identify the pin with a GPIO connection based on the ones labeled with a port / pin combination. We mention earlier that each GPIO module is separated by port, and each port can control up to 8 pins each. Therefore, the pin with the label, P1.3, has Port 1 Pin 3 attached to it. And similarly, the pin labeled P2.0 has Port 2 Pin 0 attached to it.</p>
+<div id="fig-ch03-3-8" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image8.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.7: MSP430G2553 Pinout Diagram
+</figcaption>
+</figure>
+</div>
+<p>Since we’re using a development board, the pins on the chip have been connected to the male header pins on the sides of the board. To make identification of the port and pin each one is attached to easy, the development board has included some images that use the same abbreviations to indicate which peripherals are available on which pins. This diagram is shown in Figure 3.9.</p>
+<div id="fig-ch03-3-9" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image90.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.8: MSP-EXP430G2ET Pinout Diagram
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="controlling-the-gpio" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="controlling-the-gpio"><span class="header-section-number">3.4</span> Controlling the GPIO</h2>
+<p>We have discussed the why and where of the GPIO peripherals; now let’s discuss the how. In order to control the GPIO hardware we have to write to its control registers. The control registers are memory units in the hardware itself, where each bit in the register alters the behavior of the peripheral. There are many control registers associated with the GPIO peripheral, but to start let’s focus on the most essential.</p>
+<section id="direction-register" class="level3" data-number="3.4.1">
+<h3 data-number="3.4.1" class="anchored" data-anchor-id="direction-register"><span class="header-section-number">3.4.1</span> Direction Register</h3>
+<p>Before doing anything with the GPIO pins, we first have to establish one thing: is the pin an input or an output? Are we reading or writing to the pins? The direction register sets this property for each pin of the microcontroller that it controls. The register itself is 8 bits wide, and if you recall, each GPIO module controls 8 pins. Therefore, each bit in the direction register will determine the direction (input or output) of the pin. For the MSP430G2553, writing a 0 to a bit sets the corresponding pin as an input, and writing a 1 sets it as an output. We will see this relationship of an individual bit within a register corresponding to a pin on the microcontroller used many times when discussing GPIO. Figure 3.10 illustrates how the direction register of P1 is tied to each pin that it controls. For the sake of illustration, the pins appear in sequence, but as it can be seen in Figure 3.8, these pins can be wired to various legs all around the chip and not in any particular order.</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="../images/ch03/image100.png" style="width:2.84375in;height:1.92708in" class="figure-img"></p>
+<figcaption>Timeline Description automatically generated</figcaption>
+</figure>
+</div>
+<p>Figure 3.10: Port bit and pin relationship</p>
+</section>
+<section id="output-register" class="level3" data-number="3.4.2">
+<h3 data-number="3.4.2" class="anchored" data-anchor-id="output-register"><span class="header-section-number">3.4.2</span> Output Register</h3>
+<p>The output register controls whether a high or low voltage is written to a pin. Like the direction register, the output register is an 8-bit register with each bit wired to control a single, corresponding pin. Writing a 1 or a 0 to an individual bit in the register will cause a high or low voltage, respectively, to be produced on its corresponding pin. In order for these voltages to be produced, the corresponding pin must have been configured as an output pin in the direction register.</p>
+</section>
+<section id="input-register" class="level3" data-number="3.4.3">
+<h3 data-number="3.4.3" class="anchored" data-anchor-id="input-register"><span class="header-section-number">3.4.3</span> Input Register</h3>
+<p>The input register is another 8-bit register that contains the digital value of the corresponding voltage on a pin. With the input register, we can read digital voltages produced from other circuits. Each bit will hold a 1 or a 0 if a digital high or low is read on the corresponding pin. Unlike the direction and output register, this register is read only, so it cannot be written to by the software.</p>
+</section>
+<section id="pullup-or-pulldown-resistor-enable-register" class="level3" data-number="3.4.4">
+<h3 data-number="3.4.4" class="anchored" data-anchor-id="pullup-or-pulldown-resistor-enable-register"><span class="header-section-number">3.4.4</span> Pullup or Pulldown Resistor Enable Register</h3>
+<p>In Figure 3.3 we described how to use GPIO to read a button press. This example used a switch to connect a pin directly to ground when pressed, but when disconnected, a “pull-up” resistor connected the pin the voltage source. The use of pull-up resistors and their inverse, a pull-down resistor (which connects to ground rather than the voltage source), are common enough in embedded systems that the GPIO module includes them right in the peripheral hardware so we don’t have to wire our own externally!</p>
+<p>The Pullup/Pulldown Enable Register is 8-bit wide and will enable a pull-up or pull-down resistor based on whether the corresponding bit contains a 1 or 0. If the bit contains a 1, the resistor is enabled. If it contains a 0, it is disabled. The next question is how do we select a pull-up or pull-down? In this case, we let the output register do double duty for us.</p>
+<p>Since pull-ups or pull-downs are only relevant when reading a voltage, such as in the button example earlier, we really only care to enable them when the direction register has configured the pin of interest as an input. If the pin is an input, then the bits in the output register that correspond to that pin have no purpose. Therefore, we can give those pins a purpose by allowing them to select a pull-up or pull-down resistor when the corresponding pin’s pullup/pulldown register bit has been enabled.</p>
+</section>
+<section id="the-gpio-hardware" class="level3" data-number="3.4.5">
+<h3 data-number="3.4.5" class="anchored" data-anchor-id="the-gpio-hardware"><span class="header-section-number">3.4.5</span> The GPIO Hardware</h3>
+<p>Let’s take some time and observe how the control registers create the hardware functionality we just described.</p>
+<div id="fig-ch03-3-11" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image111.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.9: GPIO Pin control schematic for Port 1 Pin 0
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-setting-an-led" class="level3" data-number="3.4.6">
+<h3 data-number="3.4.6" class="anchored" data-anchor-id="example-setting-an-led"><span class="header-section-number">3.4.6</span> Example: Setting an LED</h3>
+<p>Let’s revisit the example we discussed earlier where we used the GPIO to turn on an LED connected to one of the pins. For this example, we’ll say there is an LED connected to port 1 pin 3. If we want to write a high voltage to that pin, we must first set the pin’s direction as an output. We know that we’ll need to write a 1 to the appropriate position within the direction register, but how do we achieve this in a C program? We know that registers are mapped into memory, so we need to know the address where it resides. We can find this address by consulting the documentation.</p>
+<p>The table in Figure 3.12 shows the address ranges for the P1, P2, P3 peripherals. This table gives us each register’s name and associated address. We can see that P1’s direction register is mapped to address 0x022.</p>
+<div id="fig-ch03-3-12" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image120.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.10: GPIO Port 1 - 3 address table
+</figcaption>
+</figure>
+</div>
+<p>Now that we know P1’s directional register address, 0x022, how do we write to that memory location? In the C programming language, we learned that pointers are variables that hold the address to another variable. Therefore, we can make a pointer variable, assign it the address of the register, then dereference the pointer to write to the desired register. This code may look like:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1dir <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x022</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here we used an unsigned character pointer to point to our register. The reason an unsigned char was used is because the char data type is 8 bits, and so is our direction register. We also declared it unsigned, because the value we write to a control register such as this has no numerical significance, and therefore the two’s complement interpretation is meaningless for that number. We also had to cast the address to the type of pointer we are assigning. Another aspect to note is the inclusion of the <strong>volatile</strong> keyword. The volatile keyword prevents the compiler from optimizing out any instructions containing the variable. Sometimes, register assignments may look confusing to the compiler, or as if they do not do anything at all from an algorithmic perspective, and therefore get “optimized” out of the program when compiled. Because of this, all pointers to registers that we create will include the volatile keyword.</p>
+<p>Now that we have access to Port 1’s direction register through the pointer, we can write Pin 3 as an output. Each bit in the register corresponds to the pin with the same enumeration, so we need to write a 1 in the first bit position (we begin counting at 0, so pin 0 is the first bit from the left side).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1dir <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 direction register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We’re only concerned about pin 0, so we’ll just leave all the other pins as 0’s, which will set them all as inputs for now. The only thing left to do is write to the output register to create a high voltage. Just as before, we’ll begin by creating a pointer to the output register’s address. The address according to Figure 3.12 is 0x021.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1out <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x021</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now we just need to write a 1 to the bit 0 position to create a high voltage on pin 0.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 output register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>And that’s it! From here on we can write either a 1 or a 0 to the first bit on the output register to turn the LED on and off, respectively. Since all the other pins were configured as inputs, whether a 1 or a 0 was written to the other bit positions doesn’t really matter. We’ll see that a large component of embedded systems is reading and writing to these register memory addresses, which is known as <strong>register level programming</strong>.</p>
+<p>From a hardware perspective, let’s consider what the effects of these control register values have. There are many registers associated with the GPIO, but since we’ve only set two registers for this application, we’ll assume the others are all set to 0’s. Figure 3.13 shows the hardware for Pin0 in Port 1 with the configurations specified in the previous lines of code. The red lines represent digital high values. From here we can see that The direction register enables the buffer which allows the high value in the bit 0 position of port 1 to be forwarded to the output. We’ll also note that there are two signals, P1SEL0 and P1SEL1, which control the two multiplexors. When they are set as 0, as they are in this example, the values of the P1DIR and P1OUT register are forwarded to the circuit. The GPIO might have other modules connected to it as well, which is why the multiplexors appear in this circuit. We’re only using the basic GPIO functionality here, so we leave those as 0 and effectively ignore any other peripheral hardware connected to this circuit.</p>
+<div id="fig-ch03-3-13" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image130.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.11: Writing a high voltage to Port 1 Pin 0. Wires highlighted in red carry a digital high voltage (1), while unhighlighted carry a digital low (0). Note that some wires and components connect the output pin to other peripherals and may carry high or low voltages. For simplicity’s sake, these wires have been ignored.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-reading-a-button-press" class="level3" data-number="3.4.7">
+<h3 data-number="3.4.7" class="anchored" data-anchor-id="example-reading-a-button-press"><span class="header-section-number">3.4.7</span> Example: Reading a Button Press</h3>
+<p>For the next example, we’ll revisit the example earlier where we read a button press. This time, we’ll consider that we have a button configured as it was in Figure 3.3, with the button attached to Port 1 Pin 3. Just as we did in the LED example, we’ll have to begin by specifying the pin’s direction. We’ll write a 0 to the bit 3 position of the direction register to achieve this.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1dir <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x022</span><span class="op">;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1dir <span class="op">=</span> <span class="bn">0x00</span><span class="op">;</span> <span class="co">// writes 00000000 to p1 direction register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This will configure all 8 pins as inputs on port 1, but most importantly, pin 0 gets configured as such. For the specified circuit, everything is configured now, and all we have to do is read the input register to see if the button is pressed. Our button is connected to ground, so that means if we see a 0 in the bit 0 position, the button is pressed, and a 1 indicates otherwise. Just as with any other register, we’ll need to make a pointer to interact with the associated memory location. The input register has an offset of 0 from the base address, so it will reside at the same address as the base address.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1input <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x020</span><span class="op">;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span> p1data <span class="op">=</span> <span class="op">*</span>p1input<span class="op">;</span> <span class="co">// reads p1input and stores the result</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>We can now evaluate the “p1data” variable to determine if the button is pressed.</p>
+<p>The circuit in Figure 3.3 includes a pull-up resistor, but we discussed that the GPIO peripheral has the capability of configuring an internal pull-up resistor. We can configure the internal pull-up and then exclude the external pull-up resistor, reducing the circuit complexity and cost by removing components. To enable the internal pull up, we just need to set the enable bit in the pull-up/pull-down resistor enable register and set the associated bit in the output register to select which type of resistor we are enabling. The code to achieve this would appear as follows:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1dir <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x022</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1dir <span class="op">=</span> <span class="bn">0x00</span><span class="op">;</span> <span class="co">// writes 00000000 to p1 direction register</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1ren <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x027</span><span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1ren <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 pull-up enable register</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1out <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x021</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 output register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now we can read the button press without the external pull-up. Note that the register address for the pull-up/pull-down resistor enable register is 0x06 from the base address.</p>
+<p>Figure 3.14 shows the condition of the Port 1 Pin 0 hardware given the configuration above and when reading a high voltage. In this diagram we will be ignore the JTAG lines, as they are beyond the scope of what we’re trying to illustrate here. The important things to notice are how the P1REN.0 line enables the switch, which is then connected to either power (DVCC) or ground (DVSS) depending on P1OUT.0, which determines whether a resistor is a pull-up or pull-down.</p>
+<div id="fig-ch03-3-14" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image140.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.12: Reading a high voltage from Port 1 Pin 3
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="example-reading-a-button-press-and-setting-an-led" class="level3" data-number="3.4.8">
+<h3 data-number="3.4.8" class="anchored" data-anchor-id="example-reading-a-button-press-and-setting-an-led"><span class="header-section-number">3.4.8</span> Example Reading a Button Press and Setting an LED</h3>
+<p>Before moving on, let’s consider one final example where we will combine the two previous examples. We’ll say that we have an LED attached to Port 1 Pin 3 and a button on Port 1 Pin 0, which connects to ground when pressed. This circuit is illustrated in Figure 3.14. We want to write an application that will turn the LED on when the button is pressed. Let’s consider what we’ll need to achieve this.</p>
+<div id="fig-ch03-3-15" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image150.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.13: Example circuit schematic
+</figcaption>
+</figure>
+</div>
+<p>Let’s begin by creating pointers to the registers we want to configure:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1in <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x020</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1out <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x021</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1dir <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x022</span><span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1ren <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x027</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now we can write to each of those pointers. We want Port 1 Pin 0 as an output, and Port 1 Pin 3 as an input. This means we want a 0 in the fourth bit, and a 1 in the first bit, and we’ll write 0’s to all the others, because for this application, we don’t care what they are because they aren’t being used.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1dir <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 direction register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The directions are set, let’s also ensure that the LED starts set off, and we’ll also enable the pullup resistor for pin 0.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1ren <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 resistor enable register</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 output register</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Remember that p1out sets the output voltage for pins configured as output but selects the pull-up or pull-down configuration for inputs that have their pull enable bit set. What’s important here is that port 1 bit 0 has a 0 (to turn off the LED) and bit 0 has a 1 (to configure a pull-up resistor).</p>
+<p>Lastly, we need to read the input register and see if port 1 bit 3 has a 1 or 0 to determine if the button is pressed, then set the appropriate LED condition.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">((*</span>p1in <span class="op">&amp;</span> <span class="bn">0x08</span><span class="op">)</span> <span class="op">==</span> <span class="bn">0x00</span><span class="op">){</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x09</span><span class="op">;</span> <span class="co">// 00001001 (LED on, pull-up enabled)</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// 00001000 (LED off, pull-up enabled)</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here, the if condition dereferences the input register and checks if bit 3 is 0 (Using a process called “bit-masking”. We’ll discuss this later). If they are equal, then that means the button is pressed, and we want to turn the LED on. On the following line we do that by writing to the output register. We want to set a 1 in the bit 3 position, but we want to make sure we keep a 1 in the bit 0 position as well, otherwise we’d lose our pull-up resistor. In the else condition we catch if the button is not pressed (as the input register would be holding 0x01, when not pressed), and we write again to the output register 0x08, which will set a 0 to the bit 0 but keep a 1 on bit 3 for the pull-up.</p>
+<p>Putting the code all together, we would get the following:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(){</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Stop the [watchdog]{.underline} timer</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*</span> wdtctl <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">int</span><span class="op">*)</span> <span class="bn">0x0120</span><span class="op">;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>wdtctl <span class="op">=</span> <span class="bn">0x5A80</span><span class="op">;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1in <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x020</span><span class="op">;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1out <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x021</span><span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1dir <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x022</span><span class="op">;</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">volatile</span> <span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*</span> p1ren <span class="op">=</span> <span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span><span class="op">*)</span> <span class="bn">0x027</span><span class="op">;</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>p1dir <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 direction register</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>p1ren <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 resistor enable register</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 output register</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">){</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">((*</span>p1in <span class="op">&amp;</span> <span class="bn">0x08</span><span class="op">)</span> <span class="op">==</span> <span class="bn">0x00</span><span class="op">){</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x09</span><span class="op">;</span> <span class="co">// 00001001 (LED on, pull-up enabled)</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            <span class="op">*</span>p1out <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// 00001000 (LED off, pull-up enabled)</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>There are a few additional observations to be made regarding this program. First is the inclusion of the “while(1)” loop. This is an infinite loop and is found in nearly all embedded systems C programs. While infinite loops are generally considered a negative thing, in embedded systems we want our functionality to loop until the device is no longer powered, which the infinite while loop provides. A “1” is placed in the while’s condition, which evaluates as true.</p>
+<p>At the top of the code, we have some additional lines included. These are to disable the watchdog timer and unlock the GPIO. On power up, the MSP430 will enable a watchdog timer (which resets your program if not handled). This is a safety feature which we will elaborate on later in the book.</p>
+</section>
+<section id="going-further-beyond" class="level3" data-number="3.4.9">
+<h3 data-number="3.4.9" class="anchored" data-anchor-id="going-further-beyond"><span class="header-section-number">3.4.9</span> Going Further Beyond</h3>
+<p>We’ve covered the basics of GPIO in this chapter, but there are still many more control registers associated with GPIO. However, we don’t have all the context and motivation to understand them yet, so we’ll introduce them as they become relevant in later chapters. For now, it’s important that the fundamentals of reading and writing to the GPIO are well understood, as this content will serve as our foundation for interacting with other peripherals throughout this book.</p>
+</section>
+</section>
+<section id="register-macros" class="level2" data-number="3.5">
+<h2 data-number="3.5" class="anchored" data-anchor-id="register-macros"><span class="header-section-number">3.5</span> Register Macros</h2>
+<p>Using pointers, we are able to write to any of the register macros that we need to and have total control over the hardware. However, it can be quite tedious to have to create the pointer and dereference it every time we want to write to a peripheral. We can condense this code by creating preprocessor macros to make writing to memory locations easy.</p>
+<p>Preprocessor macros are the lines of code that begin with the “#” sign. These lines get replaced by actual C syntax after the preprocessor runs, according to what the macro contains. To make writing to registers easy, we’ll use the #define directive to create dereferenced pointers that have names associated with the register locations they represent.</p>
+<p>Let’s start with the port 1 direction register:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define P1DIR </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x022</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The define preprocessor directive will replace the text that follows the keyword (P1DIR in this case) with the code or value that follows. Now we can just use the text, “P1DIR”, anytime we want to write to that register. This macro will replace any instance of “P1DIR” in our code with the declared, cast, and dereferenced pointer, allowing us the easily read and write to that memory location.</p>
+<p>For example, we can adapt the code example earlier into the following:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define P1IN </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x020</span><span class="op">)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define P1OUT </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x021</span><span class="op">)</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define P1DIR </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x022</span><span class="op">)</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#define P1REN </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x027</span><span class="op">)</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="pp">#define WDTCTL </span><span class="op">*((</span><span class="dt">volatile</span><span class="pp"> </span><span class="dt">unsigned</span><span class="pp"> </span><span class="dt">char</span><span class="op">*)</span><span class="pp"> </span><span class="bn">0x0120</span><span class="op">)</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(){</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Stop the watchdog timer</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>    WDTCTL <span class="op">=</span> <span class="bn">0x6980</span><span class="op">;</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>    P1DIR <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 direction register</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    P1REN <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 resistor enable register</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    P1OUT <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 output register</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">){</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>P1IN <span class="op">==</span> <span class="bn">0x00</span><span class="op">){</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>            P1OUT <span class="op">=</span> <span class="bn">0x09</span><span class="op">;</span> <span class="co">// 00001001 (LED on, pull-up enabled)</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>            P1OUT <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// 00001000 (LED off, pull-up enabled)</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now, all the locations where we once created a pointer to dereference it have been replaced with the defined macro at the top of the code. This not only makes the code more concise in the long run, but also easier to read.</p>
+<p>Manufacturers of microcontrollers understand this quite well, and to make their products more attractive to the programmers who might be designing embedded systems that use them, header files are often created that contain macros for all of the different registers and their addresses. Texas Instruments is no different, and they have included a header file that provides just that. If we are using CCS, we can update our code to include this header file and not have to define each of these macros ourselves:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;msp430.h&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(){</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Stop the watchdog timer</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    WDTCTL <span class="op">=</span> <span class="bn">0x6980</span><span class="op">;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Disable the GPIO power-on default high-impedance mode</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    PM5CTL0 <span class="op">=</span> <span class="bn">0xFFFE</span><span class="op">;</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    P1DIR <span class="op">=</span> <span class="bn">0x08</span><span class="op">;</span> <span class="co">// writes 00001000 to p1 direction register</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    P1REN <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 resistor enable register</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    P1OUT <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// writes 00000001 to p1 output register</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">){</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span><span class="op">(</span>P1IN <span class="op">==</span> <span class="bn">0x00</span><span class="op">){</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>            P1OUT <span class="op">=</span> <span class="bn">0x09</span><span class="op">;</span> <span class="co">// 00001001 (LED on, pull-up enabled)</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>            P1OUT <span class="op">=</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// 00001000 (LED off, pull-up enabled)</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>By adding the preprocessor macro “#include &lt;msp430.h&gt;” at the top of our code, CCS will add the appropriate header file that contains the register macros for our target MSP430 microcontroller. Now we don’t have to define the macros ourselves and get straight into writing code to make our applications work.</p>
+</section>
+<section id="bit-masking" class="level2" data-number="3.6">
+<h2 data-number="3.6" class="anchored" data-anchor-id="bit-masking"><span class="header-section-number">3.6</span> Bit Masking</h2>
+<p>When we are manipulating individual bits on a control register, one of our biggest concerns is being able to read and write to individual bits. As we saw earlier, if I want to observe is my button is pressed or not, I need to read a single bit. However, since memory is divided into 8-bit locations, this is not possible, as I have to read at minimum 8 bits at a time. If we want to isolate a single bit, we’ll need to use something called a <strong>bit mask</strong> to single it out. Bit masks are binary values constructed in such a way that when logical ANDed or ORed with another binary value, they will zero out all other bits apart from the one of interest. It “masks off” the bits we aren’t interested in, just like you would apply masking tape when painting a wall to prevent painting on undesired surfaces.</p>
+<section id="bit-masking-for-inputs" class="level3" data-number="3.6.1">
+<h3 data-number="3.6.1" class="anchored" data-anchor-id="bit-masking-for-inputs"><span class="header-section-number">3.6.1</span> Bit Masking for Inputs</h3>
+<p>Let’s consider the example where we want to read the button press on bit 3 of Port 1. To obtain the status of the button, I’m interested in whether bit 3 of the register is a 0 (button is pressed) or a 1 (button is not pressed). However, there is no way to simply read a single bit of an input port register – I can only read the entire register, which is 8 bits long and contains the status of all 8 pins on the input port. So how do I isolate a single bit from a register? The answer is bit-masking, where we will construct a specific binary pattern that can be applied to the register’s contents via bit-wise logical operators to perform operations on individual bits.</p>
+</section>
+<section id="understanding-the-problem" class="level3" data-number="3.6.2">
+<h3 data-number="3.6.2" class="anchored" data-anchor-id="understanding-the-problem"><span class="header-section-number">3.6.2</span> Understanding the Problem</h3>
+<p>Before describing the process of bit masking, let’s take a moment to understand the problem here. We want to know whether bit 3 is a 1. If we just read all eight bits of the register, couldn’t we simply do the following?:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb16"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>P1IN <span class="op">==</span> <span class="bn">0x08</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Here we are accessing the entire register, P1IN, and checking if the contents equal to having a 1 in the bit 3 position. However, this only works if there is no other high voltages on all the other bits. Let’s consider the case where we have a second button on bit 2. If that pin were to also generate a 1, P1IN’s contents would contain 0b00001100 or 0x0C in hex. Therefore, if we wanted to check bit 3 and ignore bit 2’s inputs, we could not compare the register’s contents to 0x08.</p>
+</section>
+<section id="creating-a-bit-mask" class="level3" data-number="3.6.3">
+<h3 data-number="3.6.3" class="anchored" data-anchor-id="creating-a-bit-mask"><span class="header-section-number">3.6.3</span> Creating a Bit Mask</h3>
+<p>If I want to observe only bit 3 and check if it is a “1” or a “0”, I can create an 8-bit mask with the following value: 0b0000 1000 or 0x08 in hex. I can then perform a bitwise AND operation with the input register and this value:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb17"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span><span class="op">((</span>P1IN <span class="op">&amp;</span> <span class="bn">0x08</span><span class="op">)</span> <span class="op">==</span> <span class="bn">0x00</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The bitwise AND operation (&amp;) will perform a logical AND with each bit in the two values as seen in Figure 3.16.</p>
+<div id="fig-ch03-3-16" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image160.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.14: C Bitwise AND operation
+</figcaption>
+</figure>
+</div>
+<p>Now, if the button is not pressed, the result of the bitwise AND will result in 0b0000 1000 regardless of the contents of the other bits, as the bitwise AND with the mask will have set them to 0. With this mask we can compare the result to 0x00 or 0x01 to check for either state of the button.</p>
+</section>
+<section id="bit-masking-for-setting-bits" class="level3" data-number="3.6.4">
+<h3 data-number="3.6.4" class="anchored" data-anchor-id="bit-masking-for-setting-bits"><span class="header-section-number">3.6.4</span> Bit Masking for Setting Bits</h3>
+<p>We are also often interested in manipulating an individual bit as well. We can utilize bit masks for this purpose too. When we want to set an individual bit in a register we can use the bitwise OR operator ( | ) to achieve this. Figure 3.17 illustrates bitwise OR operator.</p>
+<div id="fig-ch03-3-17" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image170.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.15: C Bitwise OR operation
+</figcaption>
+</figure>
+</div>
+<p>Let’s say we want to set pin 0 in port 1 as an output, therefore requiring a 1 to be in the fourth bit position. If I’ve already set other pins as inputs and outputs within the register and do not want to accidentally overwrite those values, I can use a logical OR with the current register contents and a bit mask with a 1 in the bit 0 position.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb18"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>PDIR <span class="op">=</span> PDIR <span class="op">|</span> <span class="bn">0x01</span><span class="op">;</span> <span class="co">// PDIR | 00000001</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>By using the bitwise OR, only the bits with 1’s in the positions of the mask will be set. This works great for setting bits, but the OR operator can only write 1’s, it cannot clear them. Therefore, if we want to clear a bit, we need to create a mask that places 1’s in the positions we want to leave undisturbed and 0’s in the positions we want to clear. We’ll then use the bitwise AND operator to clear bits. For instance, if I wanted to set bit 0 as an input, I would write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb19"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>PDIR <span class="op">=</span> PDIR <span class="op">&amp;</span> <span class="bn">0xFE</span><span class="op">;</span> <span class="co">// PDIR &amp; 11111110</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="and-and-or-assignment-operators" class="level3" data-number="3.6.5">
+<h3 data-number="3.6.5" class="anchored" data-anchor-id="and-and-or-assignment-operators"><span class="header-section-number">3.6.5</span> AND and OR Assignment Operators</h3>
+<p>Often when bit masking, we are applying a mask to a register then assigning the result of that operation back to the register we just applied it to. Because of the frequency of these operations, the C language provides an operator shortcut just for this. We can reduce the following operation</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb20"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>PDIR <span class="op">=</span> PDIR <span class="op">|</span> <span class="bn">0x01</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>To</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb21"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>PDIR <span class="op">|=</span> <span class="bn">0x01</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Which are equivalent. The “|=” operator performs a logical OR with the contents on the left side with the right and assigns the result back to the left. Likewise, a similar operator exists for AND:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb22"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>PDIR <span class="op">&amp;=</span> <span class="bn">0xFE</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Which performs a logical AND with the contents of PDIR and assigns it back to PDIR.</p>
+</section>
+<section id="creating-bit-masks" class="level3" data-number="3.6.6">
+<h3 data-number="3.6.6" class="anchored" data-anchor-id="creating-bit-masks"><span class="header-section-number">3.6.6</span> Creating Bit Masks</h3>
+<p>We’ve seen how to create bit masks for isolating a single bit for reading and writing, but we’ve created these masks by hand and hard coded them as hexadecimal constants within our code. While this is effective, determining which bits are being masked quickly can be challenging, even for experienced programmers. To improve our code’s readability, there are several optimizations that you will observe embedded systems programmers utilize. The first is the shift operator.</p>
+<section id="the-shift-operator-method" class="level4">
+<h4 class="anchored" data-anchor-id="the-shift-operator-method">The Shift Operator Method</h4>
+<p>The shift operator in C allows a programmer to specify a value, then apply a bitwise shift on that value. For instance, let’s observe the following operation:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb23"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> x <span class="op">=</span> <span class="dv">5</span> <span class="op">&lt;&lt;</span> <span class="dv">2</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This line of code creates a 5 (0b0000 0101) then applies a left bitwise shift (&lt;&lt;) by two binary digits. The resulting value stored in x will be 20 (0b0001 0100).</p>
+<p>This syntax can be used to create a bit mask easily. We can declare a 1 then shift it to the position of the bit we wish to mask. If I want a mask that sets in P1OUT bit 3 using the shift operator, then I would write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb24"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">|=</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">3</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This operator creates a 1 (0b0000 0001) then performs a left shift three times, placing the 1 in the bit 3 position: (0000 1000). This operator can be used to target bit 0 as well:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb25"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">|=</span> <span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">0</span><span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Which creates a 1 and shifts it to the left 0 times. While this line of code ultimately does nothing, it communicates that we are creating a mask to target bit 0. Most compilers will observe that this shift does nothing and will optimize the operation out of the code, leaving a hardcoded value like we were writing earlier. Creating readable code is almost just as important as creating functional code and being able to identify which bits are being masked at a glance is extremely valuable.</p>
+<p>We can also create masks using this method that can be used to clear a bit as well. The shift operator only shifts in 0’s, so what we need to do is place the 1 in the position of the bit we wish to clear, then use the bitwise inversion operator (~) to change all the 0’s to 1’s and vice versa. If I wanted to clear bit 3 on P1OUT, I would write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb26"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">&amp;=</span> <span class="op">~(</span><span class="dv">1</span> <span class="op">&lt;&lt;</span> <span class="dv">0</span><span class="op">);</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>By wrapping the mask created with a shift in parenthesis, the shift will happen first, creating the value (0000 1000), then the ~ operator will turn the value into its bitwise inverse (0b1111 0111). This method allows us to create masks for clearing bits that are still easy to read.</p>
+</section>
+<section id="bit-mask-macros" class="level4">
+<h4 class="anchored" data-anchor-id="bit-mask-macros">Bit Mask Macros</h4>
+<p>We can optimize for readability a step further using macros combined with the shift operator. Macros can be used to create labels for each mask that clearly communicates which bits we are targeting. For example, I could write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb27"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BIT0 </span><span class="op">(</span><span class="dv">1</span><span class="pp"> </span><span class="op">&lt;&lt;</span><span class="pp"> </span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BIT1 </span><span class="op">(</span><span class="dv">1</span><span class="pp"> </span><span class="op">&lt;&lt;</span><span class="pp"> </span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BIT2 </span><span class="op">(</span><span class="dv">1</span><span class="pp"> </span><span class="op">&lt;&lt;</span><span class="pp"> </span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="pp">#define BIT3 </span><span class="op">(</span><span class="dv">1</span><span class="pp"> </span><span class="op">&lt;&lt;</span><span class="pp"> </span><span class="dv">3</span><span class="op">)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>And in the body of the code use it to set bit 3:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb28"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">|=</span> BIT3<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Now the programmer doesn’t even have to interpret the shift operator to understand which bit is being set. We can also use the ~ operator with these macros as well to create masks for clearing bits:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">&amp;=</span> <span class="op">~</span>BIT3<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>These macros are also useful for creating masks that set multiple bits. We can use the | operator to combine multiple masks then apply them to the desired register. If I wanted to set both bit 0 and bit 3, I could write:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>P1OUT <span class="op">|=</span> BIT3 <span class="op">|</span> BIT0<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The | operator would be applied to both masks creating the value, 0000 1001, then applying that mask to P1OUT. Again, this might seem like a wasted operation, given we could simply hardcode the mask and save the microprocessor the trouble of creating the mask at runtime, but any decent compiler will optimize this operation out of the resulting code at compile-time.</p>
+</section>
+<section id="msp430-header-file-macros" class="level4">
+<h4 class="anchored" data-anchor-id="msp430-header-file-macros">MSP430 Header File Macros</h4>
+<p>Due to how common the desire for defined bit mask macros is, nearly every microcontroller manufacturer will provide a header file that includes these macros. In the TI msp430 library, these macros are already defined. Figure 3.18 shows a clip from the msp430 library which includes these macros. We’ll notice here that the shift operator was not used, and the macros were hard-coded, but since the macro has been defined, this doesn’t affect the readability of the mask in any way. We’ll also observe that these macros go up to 16 bits. Despite all the registers we’ve discussed up to this point are 8-bits wide, some registers are 16-bit. This can be observed at the beginning of the main function in the LED set example for the MSP-EXP430G2ET board, where we disabled the watchdog timer using its 16-bit register (hence, why an int* was used rather than a char*).</p>
+<div id="fig-ch03-3-18" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image180.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.16: Bit mask macros from the MSP430 library
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+</section>
+<section id="example-application-led-button-press" class="level2" data-number="3.7">
+<h2 data-number="3.7" class="anchored" data-anchor-id="example-application-led-button-press"><span class="header-section-number">3.7</span> Example Application: LED Button Press</h2>
+<p>Let’s consider an example application. In this example we will use the on-board components of the MSP-EXP430G2ET to create an application that will illuminate the green LED when the right button is pressed. To achieve this, we’ll need to use the GPIO to read the state of the button and set the LED’s state accordingly. Before writing any code, we first need to know the hardware connections. If I want to read and write digital signals to the button and LED, I need to know which GPIO peripherals and pins they are attached to. To know this, I can either consult the schematic found in the MSP-EXP430G2ET user’s guide.</p>
+<div id="fig-ch03-3-19" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image190.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.17: LED connections from the schematic of the MSP-EXP430G2ET
+</figcaption>
+</figure>
+</div>
+<p>Figure 3.19 depicts the LED connections taken from the development board schematic. We can see here that the green LED is connected to port 1 pin 0 by recognizing the GPIO abbreviation. A current limiting resistor and jumper are also connected to this pin. Figure 3.20 shows clippings of the schematic with the button connections. SW1 is the button found on the left side of the development board, and we can see that it is connected to port 1 pin 3. Also, from this schematic we can tell that the buttons are connected directly to ground when pressed, which means we’ll need an internal pull-up resistor connected in order to read a digital high voltage when the button is not pressed.</p>
+<div id="fig-ch03-3-20" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch03-3-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch03/image200.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch03-3-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3.18: Button connections from the schematic of the MSP-EXP430G2ET
+</figcaption>
+</figure>
+</div>
+<p>Now that the connections are known, we can begin writing the code. We’ll use the MSP430 library to access the previously defined register macros and bit definitions.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb31"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;msp430.h&gt;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>At the start of main we’ll disable the watchdog timer, clear the GPIO lock, and set the initial control register connections. We need P1.0 configured as an output, and we need P2.3 configured as an input with an internal pull-up resistor.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb32"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Stop the watchdog timer</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>    WDTCTL <span class="op">=</span> <span class="bn">0x5A80</span><span class="op">;</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Button configs</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set P1.3 as input (all others as input due to being 0)</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    P1DIR <span class="op">&amp;=</span> <span class="op">~</span>BIT3<span class="op">;</span></span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Enable P2.3 pull-up resistor</span></span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>    P1REN <span class="op">|=</span> BIT3<span class="op">;</span></span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set P2.3 as high to configure pull-up</span></span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>    P1OUT <span class="op">|=</span> BIT3<span class="op">;</span></span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">// LED configs</span></span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Set P1.0 as output (all others as input due to being 0)</span></span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>    P1DIR <span class="op">|=</span> BIT0<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Next, we’ll add the infinite while loop. Within this while loop, we will use a bit mask to isolate P2.3 and check if the value is set to 0. If P2OUT is all 0’s after the mask, that means bit 3 was set to 0 by pressing the button, which we will then write a 1 to P1.0 to turn the LED on. Otherwise, we read a 0x08, indicating the button is not pressed, and the pull-up resistor is providing a digital high, and we will write a 0 to P1.0 to turn the LED off.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb33"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span><span class="op">(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span><span class="op">((</span>P1IN <span class="op">&amp;</span> BIT3<span class="op">)</span> <span class="op">==</span> <span class="bn">0x00</span><span class="op">){</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Button pressed, turn LED on</span></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>        P1OUT <span class="op">=</span> P1OUT <span class="op">|</span> <span class="bn">0x01</span><span class="op">;</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Button not pressed, turn LED off</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>        P1OUT <span class="op">=</span> P1OUT <span class="op">&amp;</span> <span class="bn">0xFE</span><span class="op">;</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This code will run until power is disconnected to the microcontroller, constantly checking the button and setting the LED accordingly.</p>
+</section>
+<section id="recap" class="level2" data-number="3.8">
+<h2 data-number="3.8" class="anchored" data-anchor-id="recap"><span class="header-section-number">3.8</span> Recap</h2>
+<p>In this chapter we’ve learned:</p>
+<ul>
+<li><p>How peripherals are used to interface a microcontroller with another circuit</p></li>
+<li><p>How to control peripherals by writing to control registers</p></li>
+<li><p>How to read and write digital signals using GPIO</p></li>
+<li><p>Using pointers and macros to access control registers</p></li>
+<li><p>Bit masking to isolate individual bits in a register</p></li>
+<li><p>How to create readable bit masking code</p></li>
+</ul>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/02-c-programming.html" class="pagination-link" aria-label="C Programming">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">C Programming</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../chapters/04-embedded-programming.html" class="pagination-link" aria-label="Embedded Programming">
+        <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Embedded Programming</span></span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Embedded Systems with the MSP430G2553</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

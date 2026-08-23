@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>7&nbsp; Serial Communication – Embedded Systems with the MSP430G2553</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../chapters/06-adc.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap-0a572480b27ed01c8e16a5ad86456bc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
+</head>
+
+<body class="nav-sidebar floating quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/05-timers.html">Peripherals</a></li><li class="breadcrumb-item"><a href="../chapters/07-serial-communication.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Serial Communication</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="../">Embedded Systems with the MSP430G2553</a> 
+    </div>
+      </div>
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Preface</span></a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/01-introduction.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Introduction</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/02-c-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">C Programming</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Digital I/O and Program Structure</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/03-gpio.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">General Purpose Input/Output (GPIO)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/04-embedded-programming.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Embedded Programming</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Peripherals</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/05-timers.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Timers</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/06-adc.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Analog-to-Digital Conversion (ADC)</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../chapters/07-serial-communication.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Serial Communication</span></span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link active" data-scroll-target="#learning-objectives"><span class="header-section-number">7.1</span> Learning Objectives</a></li>
+  <li><a href="#embedded-systems-need-to-communicate" id="toc-embedded-systems-need-to-communicate" class="nav-link" data-scroll-target="#embedded-systems-need-to-communicate"><span class="header-section-number">7.2</span> Embedded Systems Need to Communicate</a>
+  <ul class="collapse">
+  <li><a href="#one-vehicle-many-microcontrollers" id="toc-one-vehicle-many-microcontrollers" class="nav-link" data-scroll-target="#one-vehicle-many-microcontrollers"><span class="header-section-number">7.2.1</span> One Vehicle, Many Microcontrollers</a></li>
+  <li><a href="#a-vacuum-robot-as-a-running-example" id="toc-a-vacuum-robot-as-a-running-example" class="nav-link" data-scroll-target="#a-vacuum-robot-as-a-running-example"><span class="header-section-number">7.2.2</span> A Vacuum Robot as a Running Example</a></li>
+  </ul></li>
+  <li><a href="#building-a-digital-communication-link" id="toc-building-a-digital-communication-link" class="nav-link" data-scroll-target="#building-a-digital-communication-link"><span class="header-section-number">7.3</span> Building a Digital Communication Link</a>
+  <ul class="collapse">
+  <li><a href="#first-attempt-one-gpio-wire-for-every-bit" id="toc-first-attempt-one-gpio-wire-for-every-bit" class="nav-link" data-scroll-target="#first-attempt-one-gpio-wire-for-every-bit"><span class="header-section-number">7.3.1</span> First Attempt: One GPIO Wire for Every Bit</a></li>
+  <li><a href="#sending-the-number-21" id="toc-sending-the-number-21" class="nav-link" data-scroll-target="#sending-the-number-21"><span class="header-section-number">7.3.2</span> Sending the Number 21</a></li>
+  <li><a href="#when-does-one-value-end-and-the-next-begin" id="toc-when-does-one-value-end-and-the-next-begin" class="nav-link" data-scroll-target="#when-does-one-value-end-and-the-next-begin"><span class="header-section-number">7.3.3</span> When Does One Value End and the Next Begin?</a></li>
+  <li><a href="#attempt-1-agree-on-a-sampling-interval" id="toc-attempt-1-agree-on-a-sampling-interval" class="nav-link" data-scroll-target="#attempt-1-agree-on-a-sampling-interval"><span class="header-section-number">7.3.4</span> Attempt 1: Agree on a Sampling Interval</a></li>
+  <li><a href="#attempt-2-add-a-clock-signal" id="toc-attempt-2-add-a-clock-signal" class="nav-link" data-scroll-target="#attempt-2-add-a-clock-signal"><span class="header-section-number">7.3.5</span> Attempt 2: Add a Clock Signal</a></li>
+  <li><a href="#synchronous-and-asynchronous-communication" id="toc-synchronous-and-asynchronous-communication" class="nav-link" data-scroll-target="#synchronous-and-asynchronous-communication"><span class="header-section-number">7.3.6</span> Synchronous and Asynchronous Communication</a></li>
+  </ul></li>
+  <li><a href="#from-parallel-communication-to-serial-communication" id="toc-from-parallel-communication-to-serial-communication" class="nav-link" data-scroll-target="#from-parallel-communication-to-serial-communication"><span class="header-section-number">7.4</span> From Parallel Communication to Serial Communication</a>
+  <ul class="collapse">
+  <li><a href="#the-cost-of-a-wide-parallel-bus" id="toc-the-cost-of-a-wide-parallel-bus" class="nav-link" data-scroll-target="#the-cost-of-a-wide-parallel-bus"><span class="header-section-number">7.4.1</span> The Cost of a Wide Parallel Bus</a></li>
+  <li><a href="#reuse-one-wire-for-every-bit" id="toc-reuse-one-wire-for-every-bit" class="nav-link" data-scroll-target="#reuse-one-wire-for-every-bit"><span class="header-section-number">7.4.2</span> Reuse One Wire for Every Bit</a></li>
+  <li><a href="#familiar-examples-of-parallel-and-serial-interfaces" id="toc-familiar-examples-of-parallel-and-serial-interfaces" class="nav-link" data-scroll-target="#familiar-examples-of-parallel-and-serial-interfaces"><span class="header-section-number">7.4.3</span> Familiar Examples of Parallel and Serial Interfaces</a></li>
+  </ul></li>
+  <li><a href="#who-is-allowed-to-transmit" id="toc-who-is-allowed-to-transmit" class="nav-link" data-scroll-target="#who-is-allowed-to-transmit"><span class="header-section-number">7.5</span> Who Is Allowed to Transmit?</a>
+  <ul class="collapse">
+  <li><a href="#simplex-communication" id="toc-simplex-communication" class="nav-link" data-scroll-target="#simplex-communication"><span class="header-section-number">7.5.1</span> Simplex Communication</a></li>
+  <li><a href="#sharing-a-bidirectional-data-wire" id="toc-sharing-a-bidirectional-data-wire" class="nav-link" data-scroll-target="#sharing-a-bidirectional-data-wire"><span class="header-section-number">7.5.2</span> Sharing a Bidirectional Data Wire</a></li>
+  <li><a href="#what-happens-if-both-devices-transmit" id="toc-what-happens-if-both-devices-transmit" class="nav-link" data-scroll-target="#what-happens-if-both-devices-transmit"><span class="header-section-number">7.5.3</span> What Happens If Both Devices Transmit?</a></li>
+  <li><a href="#half-duplex-communication" id="toc-half-duplex-communication" class="nav-link" data-scroll-target="#half-duplex-communication"><span class="header-section-number">7.5.4</span> Half-Duplex Communication</a></li>
+  <li><a href="#full-duplex-communication" id="toc-full-duplex-communication" class="nav-link" data-scroll-target="#full-duplex-communication"><span class="header-section-number">7.5.5</span> Full-Duplex Communication</a></li>
+  </ul></li>
+  <li><a href="#asynchronous-serial-communication" id="toc-asynchronous-serial-communication" class="nav-link" data-scroll-target="#asynchronous-serial-communication"><span class="header-section-number">7.6</span> Asynchronous Serial Communication</a></li>
+  <li><a href="#universal-asynchronous-receivertransmitter" id="toc-universal-asynchronous-receivertransmitter" class="nav-link" data-scroll-target="#universal-asynchronous-receivertransmitter"><span class="header-section-number">7.7</span> Universal Asynchronous Receiver/Transmitter</a>
+  <ul class="collapse">
+  <li><a href="#baud-rate-and-bit-time" id="toc-baud-rate-and-bit-time" class="nav-link" data-scroll-target="#baud-rate-and-bit-time"><span class="header-section-number">7.7.1</span> Baud Rate and Bit Time</a></li>
+  <li><a href="#framing-a-uart-message" id="toc-framing-a-uart-message" class="nav-link" data-scroll-target="#framing-a-uart-message"><span class="header-section-number">7.7.2</span> Framing a UART Message</a></li>
+  <li><a href="#a-9600-8n1-example" id="toc-a-9600-8n1-example" class="nav-link" data-scroll-target="#a-9600-8n1-example"><span class="header-section-number">7.7.3</span> A 9600 8N1 Example</a></li>
+  <li><a href="#uart-wiring-and-voltage-levels" id="toc-uart-wiring-and-voltage-levels" class="nav-link" data-scroll-target="#uart-wiring-and-voltage-levels"><span class="header-section-number">7.7.4</span> UART Wiring and Voltage Levels</a></li>
+  </ul></li>
+  <li><a href="#the-msp430g2553-serial-communication-hardware" id="toc-the-msp430g2553-serial-communication-hardware" class="nav-link" data-scroll-target="#the-msp430g2553-serial-communication-hardware"><span class="header-section-number">7.8</span> The MSP430G2553 Serial Communication Hardware</a>
+  <ul class="collapse">
+  <li><a href="#finding-the-uart-pins" id="toc-finding-the-uart-pins" class="nav-link" data-scroll-target="#finding-the-uart-pins"><span class="header-section-number">7.8.1</span> Finding the UART Pins</a></li>
+  <li><a href="#usci_a0-uart-registers" id="toc-usci_a0-uart-registers" class="nav-link" data-scroll-target="#usci_a0-uart-registers"><span class="header-section-number">7.8.2</span> USCI_A0 UART Registers</a></li>
+  <li><a href="#configuring-the-baud-rate-generator" id="toc-configuring-the-baud-rate-generator" class="nav-link" data-scroll-target="#configuring-the-baud-rate-generator"><span class="header-section-number">7.8.3</span> Configuring the Baud-Rate Generator</a></li>
+  <li><a href="#example-transmitting-a-character" id="toc-example-transmitting-a-character" class="nav-link" data-scroll-target="#example-transmitting-a-character"><span class="header-section-number">7.8.4</span> Example: Transmitting a Character</a></li>
+  <li><a href="#receiving-data-by-polling" id="toc-receiving-data-by-polling" class="nav-link" data-scroll-target="#receiving-data-by-polling"><span class="header-section-number">7.8.5</span> Receiving Data by Polling</a></li>
+  <li><a href="#interrupt-driven-uart-echo" id="toc-interrupt-driven-uart-echo" class="nav-link" data-scroll-target="#interrupt-driven-uart-echo"><span class="header-section-number">7.8.6</span> Interrupt-Driven UART Echo</a></li>
+  <li><a href="#using-the-launchpad-usb-connection" id="toc-using-the-launchpad-usb-connection" class="nav-link" data-scroll-target="#using-the-launchpad-usb-connection"><span class="header-section-number">7.8.7</span> Using the LaunchPad USB Connection</a></li>
+  <li><a href="#common-uart-failure-modes" id="toc-common-uart-failure-modes" class="nav-link" data-scroll-target="#common-uart-failure-modes"><span class="header-section-number">7.8.8</span> Common UART Failure Modes</a></li>
+  </ul></li>
+  <li><a href="#synchronous-serial-communication" id="toc-synchronous-serial-communication" class="nav-link" data-scroll-target="#synchronous-serial-communication"><span class="header-section-number">7.9</span> Synchronous Serial Communication</a></li>
+  <li><a href="#serial-peripheral-interface" id="toc-serial-peripheral-interface" class="nav-link" data-scroll-target="#serial-peripheral-interface"><span class="header-section-number">7.10</span> Serial Peripheral Interface</a>
+  <ul class="collapse">
+  <li><a href="#spi-signals" id="toc-spi-signals" class="nav-link" data-scroll-target="#spi-signals"><span class="header-section-number">7.10.1</span> SPI Signals</a></li>
+  <li><a href="#clock-polarity-and-phase" id="toc-clock-polarity-and-phase" class="nav-link" data-scroll-target="#clock-polarity-and-phase"><span class="header-section-number">7.10.2</span> Clock Polarity and Phase</a></li>
+  <li><a href="#selecting-one-of-several-peripherals" id="toc-selecting-one-of-several-peripherals" class="nav-link" data-scroll-target="#selecting-one-of-several-peripherals"><span class="header-section-number">7.10.3</span> Selecting One of Several Peripherals</a></li>
+  <li><a href="#spi-on-the-msp430g2553" id="toc-spi-on-the-msp430g2553" class="nav-link" data-scroll-target="#spi-on-the-msp430g2553"><span class="header-section-number">7.10.4</span> SPI on the MSP430G2553</a></li>
+  <li><a href="#when-spi-is-a-good-choice" id="toc-when-spi-is-a-good-choice" class="nav-link" data-scroll-target="#when-spi-is-a-good-choice"><span class="header-section-number">7.10.5</span> When SPI Is a Good Choice</a></li>
+  <li><a href="#real-world-example-wi-fi-and-microsd" id="toc-real-world-example-wi-fi-and-microsd" class="nav-link" data-scroll-target="#real-world-example-wi-fi-and-microsd"><span class="header-section-number">7.10.6</span> Real-World Example: Wi-Fi and microSD</a></li>
+  </ul></li>
+  <li><a href="#inter-integrated-circuit" id="toc-inter-integrated-circuit" class="nav-link" data-scroll-target="#inter-integrated-circuit"><span class="header-section-number">7.11</span> Inter-Integrated Circuit</a>
+  <ul class="collapse">
+  <li><a href="#open-drain-signaling-and-pull-up-resistors" id="toc-open-drain-signaling-and-pull-up-resistors" class="nav-link" data-scroll-target="#open-drain-signaling-and-pull-up-resistors"><span class="header-section-number">7.11.1</span> Open-Drain Signaling and Pull-Up Resistors</a></li>
+  <li><a href="#following-an-i²c-transaction" id="toc-following-an-i²c-transaction" class="nav-link" data-scroll-target="#following-an-i²c-transaction"><span class="header-section-number">7.11.2</span> Following an I²C Transaction</a></li>
+  <li><a href="#writing-a-target-register" id="toc-writing-a-target-register" class="nav-link" data-scroll-target="#writing-a-target-register"><span class="header-section-number">7.11.3</span> Writing a Target Register</a></li>
+  <li><a href="#reading-a-target-register" id="toc-reading-a-target-register" class="nav-link" data-scroll-target="#reading-a-target-register"><span class="header-section-number">7.11.4</span> Reading a Target Register</a></li>
+  <li><a href="#i²c-on-the-msp430g2553" id="toc-i²c-on-the-msp430g2553" class="nav-link" data-scroll-target="#i²c-on-the-msp430g2553"><span class="header-section-number">7.11.5</span> I²C on the MSP430G2553</a></li>
+  <li><a href="#real-world-example-an-impact-detecting-hard-hat" id="toc-real-world-example-an-impact-detecting-hard-hat" class="nav-link" data-scroll-target="#real-world-example-an-impact-detecting-hard-hat"><span class="header-section-number">7.11.6</span> Real-World Example: An Impact-Detecting Hard Hat</a></li>
+  <li><a href="#example-reading-the-mpu6050-accelerometer" id="toc-example-reading-the-mpu6050-accelerometer" class="nav-link" data-scroll-target="#example-reading-the-mpu6050-accelerometer"><span class="header-section-number">7.11.7</span> Example: Reading the MPU6050 Accelerometer</a></li>
+  <li><a href="#real-world-example-a-mattress-sensor-array" id="toc-real-world-example-a-mattress-sensor-array" class="nav-link" data-scroll-target="#real-world-example-a-mattress-sensor-array"><span class="header-section-number">7.11.8</span> Real-World Example: A Mattress Sensor Array</a></li>
+  <li><a href="#real-world-example-an-io-expander" id="toc-real-world-example-an-io-expander" class="nav-link" data-scroll-target="#real-world-example-an-io-expander"><span class="header-section-number">7.11.9</span> Real-World Example: An I/O Expander</a></li>
+  <li><a href="#when-i²c-is-a-good-choice" id="toc-when-i²c-is-a-good-choice" class="nav-link" data-scroll-target="#when-i²c-is-a-good-choice"><span class="header-section-number">7.11.10</span> When I²C Is a Good Choice</a></li>
+  </ul></li>
+  <li><a href="#controller-area-network" id="toc-controller-area-network" class="nav-link" data-scroll-target="#controller-area-network"><span class="header-section-number">7.12</span> Controller Area Network</a>
+  <ul class="collapse">
+  <li><a href="#differential-signaling" id="toc-differential-signaling" class="nav-link" data-scroll-target="#differential-signaling"><span class="header-section-number">7.12.1</span> Differential Signaling</a></li>
+  <li><a href="#the-classical-can-frame" id="toc-the-classical-can-frame" class="nav-link" data-scroll-target="#the-classical-can-frame"><span class="header-section-number">7.12.2</span> The Classical CAN Frame</a></li>
+  <li><a href="#using-can-with-the-msp430g2553" id="toc-using-can-with-the-msp430g2553" class="nav-link" data-scroll-target="#using-can-with-the-msp430g2553"><span class="header-section-number">7.12.3</span> Using CAN with the MSP430G2553</a></li>
+  </ul></li>
+  <li><a href="#choosing-a-serial-protocol" id="toc-choosing-a-serial-protocol" class="nav-link" data-scroll-target="#choosing-a-serial-protocol"><span class="header-section-number">7.13</span> Choosing a Serial Protocol</a>
+  <ul class="collapse">
+  <li><a href="#choose-uart-when" id="toc-choose-uart-when" class="nav-link" data-scroll-target="#choose-uart-when"><span class="header-section-number">7.13.1</span> Choose UART When</a></li>
+  <li><a href="#choose-spi-when" id="toc-choose-spi-when" class="nav-link" data-scroll-target="#choose-spi-when"><span class="header-section-number">7.13.2</span> Choose SPI When</a></li>
+  <li><a href="#choose-i²c-when" id="toc-choose-i²c-when" class="nav-link" data-scroll-target="#choose-i²c-when"><span class="header-section-number">7.13.3</span> Choose I²C When</a></li>
+  <li><a href="#choose-can-when" id="toc-choose-can-when" class="nav-link" data-scroll-target="#choose-can-when"><span class="header-section-number">7.13.4</span> Choose CAN When</a></li>
+  </ul></li>
+  <li><a href="#recap" id="toc-recap" class="nav-link" data-scroll-target="#recap"><span class="header-section-number">7.14</span> Recap</a></li>
+  <li><a href="#review-questions" id="toc-review-questions" class="nav-link" data-scroll-target="#review-questions"><span class="header-section-number">7.15</span> Review Questions</a></li>
+  <li><a href="#references" id="toc-references" class="nav-link" data-scroll-target="#references"><span class="header-section-number">7.16</span> References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="../chapters/05-timers.html">Peripherals</a></li><li class="breadcrumb-item"><a href="../chapters/07-serial-communication.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Serial Communication</span></a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Serial Communication</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="learning-objectives" class="level2" data-number="7.1">
+<h2 data-number="7.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">7.1</span> Learning Objectives</h2>
+<p>In this chapter we will learn:</p>
+<ul>
+<li><p>Why embedded systems use communication protocols rather than directly connecting every data bit</p></li>
+<li><p>How a two-controller vacuum robot motivates timing, clock signals, serial links, and bus ownership</p></li>
+<li><p>The differences between parallel and serial communication</p></li>
+<li><p>The meaning of synchronous, asynchronous, simplex, half-duplex, and full-duplex communication</p></li>
+<li><p>How UART frames data and how baud rate determines timing</p></li>
+<li><p>How to configure and use the MSP430G2553 USCI_A0 peripheral for UART communication</p></li>
+<li><p>How SPI exchanges data through clocked shift registers</p></li>
+<li><p>How I²C uses addressing, acknowledgments, open-drain signaling, and repeated START conditions</p></li>
+<li><p>How CAN provides robust multi-controller communication in noisy systems</p></li>
+<li><p>How to choose an appropriate serial protocol for an embedded application</p></li>
+</ul>
+</section>
+<section id="embedded-systems-need-to-communicate" class="level2" data-number="7.2">
+<h2 data-number="7.2" class="anchored" data-anchor-id="embedded-systems-need-to-communicate"><span class="header-section-number">7.2</span> Embedded Systems Need to Communicate</h2>
+<p>An embedded application often contains several microcontrollers instead of one large processor that performs every task. Different controllers can be located near the sensors and actuators they manage, can execute independently, and can be selected to match the timing, cost, and power requirements of a particular subsystem. The resulting devices must still cooperate. Dividing the work among processors therefore creates a new engineering problem: how do those processors exchange information?</p>
+<section id="one-vehicle-many-microcontrollers" class="level3" data-number="7.2.1">
+<h3 data-number="7.2.1" class="anchored" data-anchor-id="one-vehicle-many-microcontrollers"><span class="header-section-number">7.2.1</span> One Vehicle, Many Microcontrollers</h3>
+<p>A modern vehicle provides a familiar example. Separate electronic control units may manage fuel injection and ignition timing, the transmission, anti-lock braking, airbag deployment, electric power steering, climate control, infotainment, navigation, and driver-assistance features. These are not isolated products that happen to share the same chassis. For example, a stability-control system may need wheel-speed information from the braking system, steering-angle information from another controller, and a torque-reduction response from the engine controller.</p>
+<p>The practical difficulty is not deciding whether one controller can produce a high or low voltage on a GPIO pin. We have already seen that a microcontroller can do this. The difficulty is deciding how those voltages should represent useful information, how the receiving controller knows when to read them, and what happens when several devices need to communicate. To develop the solution gradually, we will begin with a smaller and more concrete embedded system.</p>
+</section>
+<section id="a-vacuum-robot-as-a-running-example" class="level3" data-number="7.2.2">
+<h3 data-number="7.2.2" class="anchored" data-anchor-id="a-vacuum-robot-as-a-running-example"><span class="header-section-number">7.2.2</span> A Vacuum Robot as a Running Example</h3>
+<p>Consider an autonomous vacuum robot. The robot has a front bump sensor that indicates when the chassis contacts an obstacle. It has drive motors that move the wheels and additional motors that operate the vacuum mechanism. It also has wheel encoders, which produce pulses as the wheels rotate so the electronics can estimate wheel speed and distance traveled.</p>
+<div id="fig-ch07-4-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image22.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.1: A vacuum robot combines wheel encoders with multiple subsystems that must exchange information.
+</figcaption>
+</figure>
+</div>
+<p>Suppose the design uses two microcontrollers. Microcontroller 1 reads the bump sensor and executes the high-level behavior of the robot. Its program may implement a state machine that drives forward, stops when the bumper is pressed, backs away, turns, and resumes cleaning. Microcontroller 2 operates the motor-driver circuit and reads the wheel encoders. Its program can concentrate on generating motor-control signals and monitoring wheel motion.</p>
+<p>Now suppose Microcontroller 1 decides that the left wheel should run at a particular speed. The desired speed exists as a number inside Microcontroller 1, but the motor hardware is controlled by Microcontroller 2. Likewise, Microcontroller 2 may measure the actual wheel speed and need to send that measurement back. The motor controller and supervisory controller therefore need a way to transmit numbers between them.</p>
+<div id="fig-ch07-4-2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image23.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.2: The two-controller vacuum robot separates autonomy and bump sensing from motor control and encoder feedback.
+</figcaption>
+</figure>
+</div>
+<p>This is the central question that motivates the remainder of the chapter: if one microcontroller has an 8-bit value that the other microcontroller needs, how can we move that value between the devices? Rather than beginning with the name of an established protocol, we will build an answer using GPIO concepts that are already familiar.</p>
+</section>
+</section>
+<section id="building-a-digital-communication-link" class="level2" data-number="7.3">
+<h2 data-number="7.3" class="anchored" data-anchor-id="building-a-digital-communication-link"><span class="header-section-number">7.3</span> Building a Digital Communication Link</h2>
+<section id="first-attempt-one-gpio-wire-for-every-bit" class="level3" data-number="7.3.1">
+<h3 data-number="7.3.1" class="anchored" data-anchor-id="first-attempt-one-gpio-wire-for-every-bit"><span class="header-section-number">7.3.1</span> First Attempt: One GPIO Wire for Every Bit</h3>
+<p>An 8-bit value contains eight individual bits. The most direct solution is therefore to connect eight GPIO output pins on the transmitting microcontroller to eight GPIO input pins on the receiving microcontroller. The devices must also share a ground reference, although the ground connection is omitted from the simplified diagrams so that the data signals remain easy to see.</p>
+<div id="fig-ch07-4-3" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image24.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.3: Eight connections allow two microcontrollers to exchange the eight bits of a byte at the same time.
+</figcaption>
+</figure>
+</div>
+<p>Each signal carries one bit position. The first wire carries bit 0, the next carries bit 1, and the remaining wires carry bits 2 through 7. The transmitter sets each output high or low according to the value of that bit, and the receiver reads all eight GPIO inputs to reconstruct the complete byte. Because all eight bits are present simultaneously, this arrangement is called parallel communication.</p>
+</section>
+<section id="sending-the-number-21" class="level3" data-number="7.3.2">
+<h3 data-number="7.3.2" class="anchored" data-anchor-id="sending-the-number-21"><span class="header-section-number">7.3.2</span> Sending the Number 21</h3>
+<p>Consider the decimal number 21. Its eight-bit binary representation is 00010101. Bit 0 is 1, bit 1 is 0, bit 2 is 1, bit 3 is 0, bit 4 is 1, and bits 5 through 7 are 0. The transmitting microcontroller drives the bit-0, bit-2, and bit-4 wires high while holding the other five wires low. When the receiving microcontroller reads the eight inputs, it sees the pattern 00010101 and reconstructs decimal 21.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">21</span> decimal <span class="op">=</span> <span class="bn">0b00010101</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>bit <span class="dv">7</span> bit <span class="dv">6</span> bit <span class="dv">5</span> bit <span class="dv">4</span> bit <span class="dv">3</span> bit <span class="dv">2</span> bit <span class="dv">1</span> bit <span class="dv">0</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span> <span class="dv">0</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span> <span class="dv">0</span> <span class="dv">1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fig-ch07-4-4" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image25.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.4: Decimal 21 is transmitted by driving bit positions 0, 2, and 4 high on an eight-wire parallel link.
+</figcaption>
+</figure>
+</div>
+<p>If the number represents a wheel-speed command, the motor controller can use it immediately. At first, this seems to solve our problem: eight output pins connect to eight input pins, and the transmitted byte appears on the receiver. However, the diagram captures only a single instant. A real robot sends a sequence of commands over time, and that introduces a timing problem.</p>
+</section>
+<section id="when-does-one-value-end-and-the-next-begin" class="level3" data-number="7.3.3">
+<h3 data-number="7.3.3" class="anchored" data-anchor-id="when-does-one-value-end-and-the-next-begin"><span class="header-section-number">7.3.3</span> When Does One Value End and the Next Begin?</h3>
+<p>Suppose the transmitting controller sends the sequence 21, 21, 10. The first two values are identical, so none of the eight data wires changes when the transmitter advances from the first 21 to the second 21. The receiver can observe that the wires currently represent 21, but the wires alone do not reveal whether that 21 is the first message, the second message, or a value that has simply remained unchanged.</p>
+<div id="fig-ch07-4-5" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image25.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-5-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.5: An unchanged parallel pattern does not reveal whether a repeated value is a new message or the previous value held longer.
+</figcaption>
+</figure>
+</div>
+<p>The same observation could correspond to several different message sequences. A receiver might interpret one long interval as 21, 21, 21, 21, 10, 10, while the transmitter intended only 21, 21, 10. This is not a problem with binary representation: both controllers can correctly identify the voltage pattern. It is a problem of synchronization. We must define when each new value becomes available and when the receiver should sample it.</p>
+</section>
+<section id="attempt-1-agree-on-a-sampling-interval" class="level3" data-number="7.3.4">
+<h3 data-number="7.3.4" class="anchored" data-anchor-id="attempt-1-agree-on-a-sampling-interval"><span class="header-section-number">7.3.4</span> Attempt 1: Agree on a Sampling Interval</h3>
+<p>One possible solution is for both microcontrollers to operate on an agreed schedule. For example, the transmitter could place a new byte on the eight GPIO outputs every 10 milliseconds, and the receiver could read the eight GPIO inputs every 10 milliseconds. If both controllers begin at the same time and maintain compatible timing, the receiver observes the first 21, then the second 21, and then 10.</p>
+<div id="fig-ch07-4-6" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image26.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.6: The sequence 21, 21, 10 is transmitted in successive 10-millisecond intervals.
+</figcaption>
+</figure>
+</div>
+<p>This arrangement does not require a dedicated timing wire, but the agreement is fragile. The two microcontrollers use separate clock sources, and neither clock is perfectly accurate. If one device runs slightly faster, its sampling points gradually move relative to the other device’s updates. Eventually the receiver may sample the same byte twice, skip a byte, or sample while the transmitter is changing the outputs.</p>
+<p>An interrupt, another software task, or an unexpectedly long computation can also cause one device to miss its scheduled update. The fundamental limitation is that the transmitter and receiver infer one another’s timing rather than directly observing a shared timing signal. Communication based on an agreed timing interval without a transmitted clock is asynchronous.</p>
+</section>
+<section id="attempt-2-add-a-clock-signal" class="level3" data-number="7.3.5">
+<h3 data-number="7.3.5" class="anchored" data-anchor-id="attempt-2-add-a-clock-signal"><span class="header-section-number">7.3.5</span> Attempt 2: Add a Clock Signal</h3>
+<p>A more direct solution is to add one additional wire that carries a clock signal. The transmitting controller first places a valid byte on the eight data lines and then changes the clock from low to high. The receiving controller watches the clock and reads all eight data lines whenever it observes that rising edge. A new rising edge means a new byte is available even if the new byte has the same value as the previous one.</p>
+<div id="fig-ch07-4-7" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image27.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-7-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.7: Adding a ninth clock wire tells the receiver exactly when to sample the eight parallel data lines.
+</figcaption>
+</figure>
+</div>
+<p>The sequence 21, 21, 10 is now unambiguous. The receiver samples 21 at the first clock edge, 21 again at the second edge, and 10 at the third edge. The transmitter can speed up, slow down, or pause between transfers because the receiving controller responds to the clock edges rather than assuming that the next byte will appear after a fixed delay.</p>
+</section>
+<section id="synchronous-and-asynchronous-communication" class="level3" data-number="7.3.6">
+<h3 data-number="7.3.6" class="anchored" data-anchor-id="synchronous-and-asynchronous-communication"><span class="header-section-number">7.3.6</span> Synchronous and Asynchronous Communication</h3>
+<p>These two approaches introduce an important distinction. Synchronous communication includes a timing signal, usually called a clock, that tells the receiver when data should be sampled. Asynchronous communication does not transmit a separate clock. Instead, both devices must agree on timing parameters and use their local clocks to estimate when the data should be read.</p>
+<div id="fig-ch07-4-8" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image28.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-8-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.8: An agreed 10-millisecond asynchronous schedule contrasts with a synchronous link that carries a clock.
+</figcaption>
+</figure>
+</div>
+<p>Synchronous interfaces can often operate more reliably at high speeds because the transmitter explicitly identifies the sampling instants. This does not mean asynchronous interfaces are unreliable. Practical asynchronous protocols add synchronization markers and limit how long the receiver must remain aligned without resynchronizing. UART, which we will study shortly, is an example of a carefully structured asynchronous interface.</p>
+</section>
+</section>
+<section id="from-parallel-communication-to-serial-communication" class="level2" data-number="7.4">
+<h2 data-number="7.4" class="anchored" data-anchor-id="from-parallel-communication-to-serial-communication"><span class="header-section-number">7.4</span> From Parallel Communication to Serial Communication</h2>
+<section id="the-cost-of-a-wide-parallel-bus" class="level3" data-number="7.4.1">
+<h3 data-number="7.4.1" class="anchored" data-anchor-id="the-cost-of-a-wide-parallel-bus"><span class="header-section-number">7.4.1</span> The Cost of a Wide Parallel Bus</h3>
+<p>Our clocked parallel interface transfers an entire byte on each clock edge, but the connection requires eight data pins plus one clock pin on each microcontroller. If the robot also needs bump sensors, motor-control outputs, encoder inputs, indicators, and other peripherals, dedicating nine pins to a single communication channel is expensive. Wider data transfers consume even more pins: a 16-bit interface would require sixteen data wires plus timing and control signals.</p>
+<p>The wiring also increases connector size, printed-circuit-board routing complexity, and cable cost. At higher speeds, the individual wires do not necessarily deliver their signals to the receiver at exactly the same instant. Differences in trace length and electrical loading produce timing skew, which can force the receiver to wait for the slowest signal before safely sampling the group.</p>
+</section>
+<section id="reuse-one-wire-for-every-bit" class="level3" data-number="7.4.2">
+<h3 data-number="7.4.2" class="anchored" data-anchor-id="reuse-one-wire-for-every-bit"><span class="header-section-number">7.4.2</span> Reuse One Wire for Every Bit</h3>
+<p>Instead of providing a separate wire for each bit, suppose we place one bit at a time on a single data wire. The transmitter drives the first bit onto the wire and produces a clock edge. The receiver samples the wire and stores that bit. The transmitter then places the next bit on the same wire, generates another clock edge, and repeats the process until all eight bits have been transferred.</p>
+<div id="fig-ch07-4-9" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image29.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-9-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.9: Replacing eight parallel data wires with one data wire and one clock wire creates a synchronous serial link.
+</figcaption>
+</figure>
+</div>
+<p>The receiving controller reconstructs the original byte by collecting the bits in their agreed order. For decimal 21, an interface that sends the most-significant bit first transmits 0, 0, 0, 1, 0, 1, 0, 1. An interface that sends the least-significant bit first transmits 1, 0, 1, 0, 1, 0, 0, 0. Either order is valid as long as both devices follow the same convention.</p>
+<p>This is serial communication: the individual bits of a value move sequentially over a shared data path rather than simultaneously across separate wires. The transfer now requires eight clock edges instead of one, but the number of data wires falls from eight to one. The resulting savings in pins, wiring, board area, and connector size explain why serial communication dominates modern embedded systems.</p>
+</section>
+<section id="familiar-examples-of-parallel-and-serial-interfaces" class="level3" data-number="7.4.3">
+<h3 data-number="7.4.3" class="anchored" data-anchor-id="familiar-examples-of-parallel-and-serial-interfaces"><span class="header-section-number">7.4.3</span> Familiar Examples of Parallel and Serial Interfaces</h3>
+<p>Older desktop computers often included a parallel printer port, which transferred several data bits simultaneously, and a serial port, which transferred bits sequentially using asynchronous signaling such as UART with RS-232 electrical levels. Universal Serial Bus, or USB, is another familiar serial interface, although its signaling and packet structure are substantially more complex than the UART, SPI, and I²C examples in this chapter.</p>
+<p>The important distinction is not whether a connector is physically large or small. Parallel communication dedicates multiple data wires to the bits of a value. Serial communication reuses a smaller number of data wires over successive bit periods. Whether the timing is synchronous or asynchronous is a separate design choice.</p>
+</section>
+</section>
+<section id="who-is-allowed-to-transmit" class="level2" data-number="7.5">
+<h2 data-number="7.5" class="anchored" data-anchor-id="who-is-allowed-to-transmit"><span class="header-section-number">7.5</span> Who Is Allowed to Transmit?</h2>
+<section id="simplex-communication" class="level3" data-number="7.5.1">
+<h3 data-number="7.5.1" class="anchored" data-anchor-id="simplex-communication"><span class="header-section-number">7.5.1</span> Simplex Communication</h3>
+<p>So far, our serial example sends data from one microcontroller to the other. One device acts as the transmitter, labeled TX, and the other acts as the receiver, labeled RX. If information is only allowed to move in this one direction, the connection is simplex. A sensor that only reports measurements to a controller can operate this way.</p>
+<div id="fig-ch07-4-10" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image31.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-10-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.10: A simplex connection assigns one transmitter and one receiver, so data travels in only one direction.
+</figcaption>
+</figure>
+</div>
+<p>Simplex communication is not sufficient for the vacuum robot if the supervisory controller needs to send motor-speed commands while the motor controller also needs to return encoder measurements. We must extend the connection so both devices can transmit.</p>
+</section>
+<section id="sharing-a-bidirectional-data-wire" class="level3" data-number="7.5.2">
+<h3 data-number="7.5.2" class="anchored" data-anchor-id="sharing-a-bidirectional-data-wire"><span class="header-section-number">7.5.2</span> Sharing a Bidirectional Data Wire</h3>
+<p>One option is to let both devices use the same data wire. A microcontroller configures its GPIO pin as an output when it is transmitting and as an input when it is receiving. After one message is complete, the devices can reverse their roles. The wire is therefore capable of carrying information in either direction, but only when both controllers agree about which one currently owns it.</p>
+<div id="fig-ch07-4-11" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image32.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-11-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.11: A shared data wire can be bidirectional when each microcontroller changes its GPIO direction at the correct time.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="what-happens-if-both-devices-transmit" class="level3" data-number="7.5.3">
+<h3 data-number="7.5.3" class="anchored" data-anchor-id="what-happens-if-both-devices-transmit"><span class="header-section-number">7.5.3</span> What Happens If Both Devices Transmit?</h3>
+<p>Sharing one actively driven signal creates an immediate concern: what if both microcontrollers attempt to transmit at the same time? Suppose one controller drives the line high while the other controller drives the same line low. The outputs are now attempting to impose incompatible voltages on the same conductor. The resulting condition is called bus contention.</p>
+<div id="fig-ch07-4-12" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image33.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-12-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.12: If two push-pull outputs drive conflicting values on a shared wire, the bus experiences contention.
+</figcaption>
+</figure>
+</div>
+<p>Bus contention can produce an undefined logic level, corrupted data, excessive current, and potentially damaged output drivers. A shared interface therefore needs a rule that prevents simultaneous push-pull transmission. Software can assign turns, hardware can select one device at a time, or the electrical interface can use a signaling method such as the open-drain outputs used by I²C.</p>
+</section>
+<section id="half-duplex-communication" class="level3" data-number="7.5.4">
+<h3 data-number="7.5.4" class="anchored" data-anchor-id="half-duplex-communication"><span class="header-section-number">7.5.4</span> Half-Duplex Communication</h3>
+<p>When both devices can communicate but must take turns on the same data path, the interface is half-duplex. Microcontroller 1 may transmit a motor command, release the line, and then allow Microcontroller 2 to transmit its encoder feedback. Both directions are supported, but they cannot carry independent messages simultaneously.</p>
+<div id="fig-ch07-4-13" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image34.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-13-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.13: A half-duplex connection supports both directions, but the devices must take turns using the shared data wire.
+</figcaption>
+</figure>
+</div>
+<p>A half-duplex protocol must define when a device is allowed to begin, how the other device recognizes the end of the current message, and who controls the line during responses. These rules may be implemented through timing, addressing, arbitration, chip-selection signals, or electrical conventions. The reduced pin count is useful, but coordinating bus ownership adds complexity.</p>
+</section>
+<section id="full-duplex-communication" class="level3" data-number="7.5.5">
+<h3 data-number="7.5.5" class="anchored" data-anchor-id="full-duplex-communication"><span class="header-section-number">7.5.5</span> Full-Duplex Communication</h3>
+<p>The alternative is to add a second data wire. One wire carries information from Microcontroller 1 to Microcontroller 2, and the other carries information from Microcontroller 2 to Microcontroller 1. Each output drives only its dedicated direction, so both devices can send data at the same time without competing for the same conductor. This arrangement is full-duplex communication.</p>
+<div id="fig-ch07-4-14" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image35.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-14-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.14: A full-duplex connection uses separate transmit and receive paths so both devices can communicate simultaneously.
+</figcaption>
+</figure>
+</div>
+<p>These classifications reappear throughout the remainder of the chapter. UART normally uses a dedicated transmit wire and a dedicated receive wire, allowing full-duplex operation. SPI also has separate controller-output and controller-input data paths, so it can shift bits in both directions on each clock cycle. I²C shares one bidirectional data line and therefore operates as a half-duplex interface. CAN likewise uses a shared bus, but its electrical signaling and arbitration rules determine which message wins when multiple devices begin transmitting.</p>
+</section>
+</section>
+<section id="asynchronous-serial-communication" class="level2" data-number="7.6">
+<h2 data-number="7.6" class="anchored" data-anchor-id="asynchronous-serial-communication"><span class="header-section-number">7.6</span> Asynchronous Serial Communication</h2>
+<p>The clocked serial link in the previous example requires one data wire plus one clock wire for a single direction. We can reduce the required wiring further if the transmitter and receiver agree on how long each bit remains valid and add a recognizable marker that announces the beginning of a message. The receiver can then reconstruct the sampling instants from its own local clock. This idea leads directly to UART.</p>
+</section>
+<section id="universal-asynchronous-receivertransmitter" class="level2" data-number="7.7">
+<h2 data-number="7.7" class="anchored" data-anchor-id="universal-asynchronous-receivertransmitter"><span class="header-section-number">7.7</span> Universal Asynchronous Receiver/Transmitter</h2>
+<p>A Universal Asynchronous Receiver/Transmitter, normally shortened to UART, is a hardware peripheral that converts bytes in the processor into timed serial frames and converts received frames back into bytes. The word universal reflects that the peripheral can be configured for several frame formats and rates. UART describes the digital communication mechanism inside the devices. It does not by itself specify a connector or a long-distance electrical standard.</p>
+<p>A UART link normally uses one transmit signal, one receive signal, and a shared ground. Because no clock is transmitted, the devices must agree on the baud rate, number of data bits, parity setting, and number of stop bits. A common configuration is written as 9600 8N1: 9600 baud, eight data bits, no parity, and one stop bit.</p>
+<section id="baud-rate-and-bit-time" class="level3" data-number="7.7.1">
+<h3 data-number="7.7.1" class="anchored" data-anchor-id="baud-rate-and-bit-time"><span class="header-section-number">7.7.1</span> Baud Rate and Bit Time</h3>
+<p>Baud rate is the number of symbols transmitted each second. A simple UART represents one bit with each symbol, so its baud rate is numerically equal to its bit rate. At 9600 baud, one bit occupies</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>bit time <span class="op">=</span> <span class="dv">1</span> <span class="op">/</span> <span class="dv">9600</span> <span class="op">=</span> <span class="fl">104.17</span> microseconds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A complete frame contains more than the eight payload bits. With 8N1 formatting, one start bit and one stop bit are added, giving ten transmitted bits per byte. The maximum payload rate is therefore 960 bytes per second, not 1200 bytes per second. This distinction matters when estimating whether an interface is fast enough for a stream of measurements.</p>
+</section>
+<section id="framing-a-uart-message" class="level3" data-number="7.7.2">
+<h3 data-number="7.7.2" class="anchored" data-anchor-id="framing-a-uart-message"><span class="header-section-number">7.7.2</span> Framing a UART Message</h3>
+<p>The UART signal remains high while the link is idle. To begin a frame, the transmitter drives the signal low for one bit period. This start bit creates an edge that allows the receiver to synchronize its local timing. The data bits follow, usually least-significant bit first. An optional parity bit may be added, followed by one or more high stop bits. The stop bit returns the signal to the idle condition and provides separation before the next frame.</p>
+<div id="fig-ch07-4-15" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image36.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-15-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.15: A configurable UART frame surrounds the data field with synchronization and optional error-checking bits.
+</figcaption>
+</figure>
+</div>
+<section id="data-bits" class="level4">
+<h4 class="anchored" data-anchor-id="data-bits">Data Bits</h4>
+<p>Most current embedded applications use eight data bits because a byte is the natural unit of memory and text encodings such as ASCII fit within a byte. UART hardware can also support shorter data fields for older or specialized systems. The transmitter and receiver must use the same length. If one side expects seven data bits while the other sends eight, every following field will be interpreted at the wrong location.</p>
+</section>
+<section id="start-and-stop-bits" class="level4">
+<h4 class="anchored" data-anchor-id="start-and-stop-bits">Start and Stop Bits</h4>
+<p>The start bit is always the opposite of the idle level. The receiver detects the high-to-low transition and waits approximately half a bit period before confirming the start bit near its center. It then samples each data bit one bit period apart. After the final data or parity bit, the receiver expects a high stop bit. If the signal is low where the stop bit should occur, the UART reports a framing error. A framing error commonly indicates mismatched baud rates, incorrect frame settings, electrical noise, or a wire connected to the wrong signal.</p>
+</section>
+<section id="parity" class="level4">
+<h4 class="anchored" data-anchor-id="parity">Parity</h4>
+<p>Parity provides simple error detection. With even parity, the transmitter selects the parity bit so the total number of 1 bits in the data and parity field is even. Odd parity makes the total odd. If one bit changes during transmission, the receiver computes a different parity and reports an error. Parity cannot correct the damaged data, and it cannot detect every multi-bit error. Many short, reliable UART links omit parity and rely on a higher-level checksum when stronger protection is needed.</p>
+</section>
+</section>
+<section id="a-9600-8n1-example" class="level3" data-number="7.7.3">
+<h3 data-number="7.7.3" class="anchored" data-anchor-id="a-9600-8n1-example"><span class="header-section-number">7.7.3</span> A 9600 8N1 Example</h3>
+<p>Suppose the vacuum robot reports that a command completed successfully by transmitting the two-character message OK. The ASCII value of uppercase O is decimal 79, or hexadecimal 0x4F; its eight-bit binary representation is 01001111. Uppercase K is decimal 75, or hexadecimal 0x4B; its binary representation is 01001011. UART creates a separate frame for each character rather than transmitting the letters as one unstructured voltage sequence.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ch">'O'</span> <span class="op">=</span> <span class="dv">79</span> decimal <span class="op">=</span> <span class="bn">0x4F</span> <span class="op">=</span> <span class="bn">0b01001111</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ch">'K'</span> <span class="op">=</span> <span class="dv">75</span> decimal <span class="op">=</span> <span class="bn">0x4B</span> <span class="op">=</span> <span class="bn">0b01001011</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The figure below shows a frame carrying the character O. The start bit is low, the eight data bits are transmitted least-significant bit first, and the stop bit is high. Every bit occupies approximately 104 microseconds at 9600 baud. The entire ten-bit frame therefore requires approximately 1.04 milliseconds, and the two-character message requires approximately 2.08 milliseconds before any optional spacing between frames.</p>
+<div id="fig-ch07-4-16" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image37.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-16-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.16: A 9600-baud 8N1 UART frame carrying the ASCII character ‘O’.
+</figcaption>
+</figure>
+</div>
+<p>The receiver does not need a clock edge for every bit. It assumes that the edges between bit cells occur at multiples of the configured bit time after the start edge. Sampling near the center of each cell gives the largest tolerance to jitter and clock mismatch. The frame is deliberately short so timing error does not accumulate indefinitely.</p>
+</section>
+<section id="uart-wiring-and-voltage-levels" class="level3" data-number="7.7.4">
+<h3 data-number="7.7.4" class="anchored" data-anchor-id="uart-wiring-and-voltage-levels"><span class="header-section-number">7.7.4</span> UART Wiring and Voltage Levels</h3>
+<p>The transmit output of one device must connect to the receive input of the other. Connecting TX to TX causes both outputs to drive the same line and leaves neither receiver connected to useful data. The devices also need a common ground so their voltage thresholds have the same reference. The following diagram shows the normal cross-connection.</p>
+<div id="fig-ch07-4-17" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image38.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-17-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.17: A logic-level UART connection crosses transmit and receive and shares a ground reference.
+</figcaption>
+</figure>
+</div>
+<p>The MSP430G2553 uses logic-level signals near its supply voltage. These signals are often informally called TTL serial, although a 3.3-V CMOS output is not literally the older 5-V TTL standard. Logic-level UART should only connect directly to a device with compatible voltage thresholds. A 5-V output can damage a 3.3-V-only input unless a level shifter or voltage divider is used.</p>
+<p>RS-232 is a different electrical standard that also carries asynchronous serial frames. It uses positive and negative voltages and reverses the logical polarity relative to a typical microcontroller UART. An RS-232 cable must not be connected directly to an MSP430 pin. A transceiver such as the MAX3232 translates between the voltage domains. Likewise, the USB connector on a computer does not carry UART voltage levels. A USB-to-UART bridge is required to create a virtual serial port.</p>
+</section>
+</section>
+<section id="the-msp430g2553-serial-communication-hardware" class="level2" data-number="7.8">
+<h2 data-number="7.8" class="anchored" data-anchor-id="the-msp430g2553-serial-communication-hardware"><span class="header-section-number">7.8</span> The MSP430G2553 Serial Communication Hardware</h2>
+<p>The MSP430G2553 contains a Universal Serial Communication Interface, abbreviated USCI. This name is easy to confuse with the simpler USI peripheral found on some other MSP430 devices. The distinction matters: the MSP430G2553 uses USCI, and its USCI_A0 module includes UART hardware. A plain USI module supports synchronous interfaces but does not provide UART.</p>
+<p>The device contains two related modules. USCI_A0 supports UART and SPI. USCI_B0 supports SPI and I²C. Each module can operate in only one mode at a time, so using USCI_A0 for UART means that same module cannot simultaneously provide an additional SPI bus. The following diagram summarizes the relationship between the CPU, the USCI modules, and the pins.</p>
+<div id="fig-ch07-4-18" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image39.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-18-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.18: The MSP430G2553 provides UART/SPI through USCI_A0 and SPI/I²C through USCI_B0.
+</figcaption>
+</figure>
+</div>
+<section id="finding-the-uart-pins" class="level3" data-number="7.8.1">
+<h3 data-number="7.8.1" class="anchored" data-anchor-id="finding-the-uart-pins"><span class="header-section-number">7.8.1</span> Finding the UART Pins</h3>
+<p>Peripheral hardware is connected internally to selected package pins. The MSP430G2553 pinout identifies P1.1 as UCA0RXD and P1.2 as UCA0TXD. The same pins can also serve as GPIO or SPI signals, so software must select the peripheral function before UART data can reach the pins. The P1SEL and P1SEL2 registers control this routing.</p>
+<div id="fig-ch07-4-19" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image41.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-19-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.19: The 20-pin MSP430G2553 pinout identifies the alternative peripheral functions available on each GPIO pin.
+</figcaption>
+</figure>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>P1SEL <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>P1SEL2 <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Setting both selection bits for P1.1 and P1.2 connects those pins to USCI_A0. From that point, the UART peripheral rather than the ordinary GPIO data registers controls the pins. When debugging a serial connection, checking the pin-selection registers is just as important as checking the UART registers.</p>
+</section>
+<section id="usci_a0-uart-registers" class="level3" data-number="7.8.2">
+<h3 data-number="7.8.2" class="anchored" data-anchor-id="usci_a0-uart-registers"><span class="header-section-number">7.8.2</span> USCI_A0 UART Registers</h3>
+<p>The UART configuration is distributed across several memory-mapped registers. UCA0CTL0 selects the frame format. UCA0CTL1 selects the clock source and contains the UCSWRST software-reset bit. UCA0BR0, UCA0BR1, and UCA0MCTL form the baud-rate generator. UCA0TXBUF and UCA0RXBUF provide the software-visible transmit and receive buffers. The IE2 and IFG2 special-function registers contain interrupt-enable and status flags associated with USCI_A0.</p>
+<div id="fig-ch07-4-20" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image42.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-20-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.20: The USCI_A0 control, status, baud-rate, and data registers used by UART mode.
+</figcaption>
+</figure>
+</div>
+<section id="frame-format-uca0ctl0" class="level4">
+<h4 class="anchored" data-anchor-id="frame-format-uca0ctl0">Frame Format: UCA0CTL0</h4>
+<p>The UCA0CTL0 register controls parity, bit order, data length, stop bits, and operating mode. Standard 8N1 UART is represented by the reset values for these format fields: parity disabled, least-significant bit first, eight data bits, one stop bit, asynchronous mode. Explicitly writing zero to the register makes this intent clear.</p>
+<div id="fig-ch07-4-21" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-21-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image43.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-21-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.21: UCA0CTL0 selects the UART frame format.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="clock-source-and-reset-uca0ctl1" class="level4">
+<h4 class="anchored" data-anchor-id="clock-source-and-reset-uca0ctl1">Clock Source and Reset: UCA0CTL1</h4>
+<p>USCI configuration should be changed while the module is held in software reset. UCSWRST is set before modifying the mode and baud-rate registers. UCSSEL_2 selects the subsystem master clock, SMCLK, as the bit-clock source. Clearing UCSWRST after configuration allows the peripheral state machine to operate.</p>
+<div id="fig-ch07-4-22" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-22-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image44.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-22-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.22: UCA0CTL1 selects the baud-rate clock and holds the USCI module in software reset during configuration.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="configuring-the-baud-rate-generator" class="level3" data-number="7.8.3">
+<h3 data-number="7.8.3" class="anchored" data-anchor-id="configuring-the-baud-rate-generator"><span class="header-section-number">7.8.3</span> Configuring the Baud-Rate Generator</h3>
+<p>The baud-rate generator divides a source clock into the timing used by the UART. Let fBRCLK be the selected clock frequency and fbaud be the desired baud rate. The ideal divider is</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>N <span class="op">=</span> fBRCLK <span class="op">/</span> fbaud</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>For a calibrated 1-MHz SMCLK and 9600 baud, N is 104.167. The integer portion, 104, is written into the combined UCA0BR1:UCA0BR0 divider. The remaining fraction cannot be represented by the integer divider, so UCA0MCTL periodically adjusts the timing. Texas Instruments tabulates modulation settings for common frequencies. At 1 MHz and 9600 baud, the recommended settings are UCA0BR0 = 104, UCA0BR1 = 0, and UCA0MCTL = UCBRS0.</p>
+<div id="fig-ch07-4-23" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-23-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image45.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-23-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.23: Common USCI UART divider and modulation settings from the MSP430 family documentation.
+</figcaption>
+</figure>
+</div>
+<p>The calibrated-clock constants stored in the device information memory are used to configure the digitally controlled oscillator. Production code should verify that these calibration constants are valid before using them, because an erased information segment contains 0xFF rather than usable values.</p>
+</section>
+<section id="example-transmitting-a-character" class="level3" data-number="7.8.4">
+<h3 data-number="7.8.4" class="anchored" data-anchor-id="example-transmitting-a-character"><span class="header-section-number">7.8.4</span> Example: Transmitting a Character</h3>
+<p>The following program configures USCI_A0 for 9600-baud 8N1 communication and transmits the character ‘A’ approximately once per second. The transmit function waits for UCA0TXIFG before writing UCA0TXBUF. The flag indicates that the transmit buffer can accept another byte; it does not necessarily mean the final stop bit has already left the pin.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;msp430.h&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">void</span> uart_init<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    BCSCTL1 <span class="op">=</span> CALBC1_1MHZ<span class="op">;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    DCOCTL <span class="op">=</span> CALDCO_1MHZ<span class="op">;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    P1SEL <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    P1SEL2 <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    UCA0CTL1 <span class="op">=</span> UCSWRST <span class="op">|</span> UCSSEL_2<span class="op">;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    UCA0CTL0 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> <span class="co">// 8 data, no parity, 1 stop</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    UCA0BR0 <span class="op">=</span> <span class="dv">104</span><span class="op">;</span> <span class="co">// 1 MHz / 9600 baud</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    UCA0BR1 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>    UCA0MCTL <span class="op">=</span> UCBRS0<span class="op">;</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    UCA0CTL1 <span class="op">&amp;=</span> <span class="op">~</span>UCSWRST<span class="op">;</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">void</span> uart_send<span class="op">(</span><span class="dt">char</span> value<span class="op">)</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCA0TXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Wait until UCA0TXBUF is available.</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>    UCA0TXBUF <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>    WDTCTL <span class="op">=</span> WDTPW <span class="op">|</span> WDTHOLD<span class="op">;</span></span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>    uart_init<span class="op">();</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>        uart_send<span class="op">(</span><span class="ch">'A'</span><span class="op">);</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>        __delay_cycles<span class="op">(</span><span class="dv">1000000</span><span class="op">);</span></span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="fig-ch07-4-24" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-24-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image46.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-24-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.24: Writing UCA0TXBUF begins a hardware-managed transfer through the transmit shift register.
+</figcaption>
+</figure>
+</div>
+<p>The processor does not manually toggle P1.2 for every bit. Software writes one byte to UCA0TXBUF, and the USCI hardware moves that byte into an internal shift register when the transmitter is ready. The shift register generates the start bit, data bits, and stop bit with the configured timing. This division of responsibility is one of the primary benefits of a hardware peripheral.</p>
+</section>
+<section id="receiving-data-by-polling" class="level3" data-number="7.8.5">
+<h3 data-number="7.8.5" class="anchored" data-anchor-id="receiving-data-by-polling"><span class="header-section-number">7.8.5</span> Receiving Data by Polling</h3>
+<p>The receive side works in the opposite direction. USCI_A0 monitors P1.1, recognizes a valid start bit, samples the data, checks the frame, and places the completed byte in UCA0RXBUF. UCA0RXIFG is set when the byte is ready. Reading UCA0RXBUF clears the receive flag. A simple blocking receive function is shown below.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">char</span> uart_receive<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCA0RXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Wait for a complete frame.</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> UCA0RXBUF<span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Polling is appropriate when the program has nothing useful to do until a byte arrives. It becomes wasteful when the processor should handle other work or enter a low-power mode. If a byte arrives while UCA0RXBUF still holds unread data, the previous value can be overwritten and an overrun error can occur. The program must service the receiver quickly enough or use an interrupt and a software buffer.</p>
+</section>
+<section id="interrupt-driven-uart-echo" class="level3" data-number="7.8.6">
+<h3 data-number="7.8.6" class="anchored" data-anchor-id="interrupt-driven-uart-echo"><span class="header-section-number">7.8.6</span> Interrupt-Driven UART Echo</h3>
+<p>An echo program sends every received character back to the transmitter. It is useful because one short test exercises the pin routing, baud-rate settings, receive hardware, interrupt system, and transmit hardware. The receive interrupt allows the main program to sleep until a character arrives.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#include </span><span class="im">&lt;msp430.h&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> main<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    WDTCTL <span class="op">=</span> WDTPW <span class="op">|</span> WDTHOLD<span class="op">;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    BCSCTL1 <span class="op">=</span> CALBC1_1MHZ<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    DCOCTL <span class="op">=</span> CALDCO_1MHZ<span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    P1SEL <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    P1SEL2 <span class="op">|=</span> BIT1 <span class="op">|</span> BIT2<span class="op">;</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    UCA0CTL1 <span class="op">=</span> UCSWRST <span class="op">|</span> UCSSEL_2<span class="op">;</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    UCA0CTL0 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    UCA0BR0 <span class="op">=</span> <span class="dv">104</span><span class="op">;</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    UCA0BR1 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    UCA0MCTL <span class="op">=</span> UCBRS0<span class="op">;</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    UCA0CTL1 <span class="op">&amp;=</span> <span class="op">~</span>UCSWRST<span class="op">;</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    IE2 <span class="op">|=</span> UCA0RXIE<span class="op">;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    __bis_SR_register<span class="op">(</span>LPM0_bits <span class="op">|</span> GIE<span class="op">);</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span><span class="dv">1</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Execution resumes here only if the ISR wakes the CPU.</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="pp">#pragma vector=USCIAB0RX_VECTOR</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>__interrupt <span class="dt">void</span> usci_rx_isr<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="dt">char</span> received <span class="op">=</span> UCA0RXBUF<span class="op">;</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCA0TXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Wait for the transmit buffer.</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>    UCA0TXBUF <span class="op">=</span> received<span class="op">;</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The MSP430G2553 combines the USCI_A0 and USCI_B0 receive sources into the USCIAB0RX_VECTOR. A larger program should inspect the flags to determine which module caused the interrupt. This example only enables the UCA0 receive interrupt, so reading UCA0RXBUF is sufficient. An application that receives a continuous stream would normally place bytes into a circular buffer and let the main program process them outside the interrupt service routine.</p>
+</section>
+<section id="using-the-launchpad-usb-connection" class="level3" data-number="7.8.7">
+<h3 data-number="7.8.7" class="anchored" data-anchor-id="using-the-launchpad-usb-connection"><span class="header-section-number">7.8.7</span> Using the LaunchPad USB Connection</h3>
+<p>The MSP430 LaunchPad includes a debugger or emulator section that communicates with the host computer through USB. In addition to programming and debugging the target, the emulator can bridge the target UART to a virtual serial port. P1.1 and P1.2 must be routed through the board jumpers in the hardware-UART orientation. The host then opens the serial port using a terminal application and selects the same baud rate, data length, parity, and stop-bit settings as the MSP430.</p>
+<div id="fig-ch07-4-25" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-25-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image47.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-25-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.25: The LaunchPad debugger bridges USCI_A0 UART signals to a virtual serial port on the host computer.
+</figcaption>
+</figure>
+</div>
+<p>A useful troubleshooting order is to first confirm that the correct serial port appears on the computer, then confirm the terminal settings, then verify the LaunchPad jumper orientation, and finally inspect the MSP430 clock, pin-selection, and USCI registers. Randomly changing the baud rate rarely fixes a connection whose actual problem is swapped wires or the wrong virtual port.</p>
+</section>
+<section id="common-uart-failure-modes" class="level3" data-number="7.8.8">
+<h3 data-number="7.8.8" class="anchored" data-anchor-id="common-uart-failure-modes"><span class="header-section-number">7.8.8</span> Common UART Failure Modes</h3>
+<ul>
+<li><p>No characters appear: verify common ground, TX-to-RX wiring, pin selection, peripheral reset state, and terminal port.</p></li>
+<li><p>Unreadable characters appear consistently: verify baud rate, SMCLK frequency, data length, parity, and stop-bit settings.</p></li>
+<li><p>Only the first character is correct: check whether software waits for UCA0TXIFG before each write.</p></li>
+<li><p>Characters are occasionally missing: service UCA0RXBUF sooner or add an interrupt-driven software buffer.</p></li>
+<li><p>The signal is electrically wrong: confirm compatible logic levels and do not connect RS-232 voltages directly.</p></li>
+</ul>
+</section>
+</section>
+<section id="synchronous-serial-communication" class="level2" data-number="7.9">
+<h2 data-number="7.9" class="anchored" data-anchor-id="synchronous-serial-communication"><span class="header-section-number">7.9</span> Synchronous Serial Communication</h2>
+<p>UART removes the clock wire by requiring both devices to agree on a baud rate and frame format. That is convenient for a terminal or another point-to-point connection, but the two devices still depend on separate local clocks. A synchronous serial interface instead returns to the clocked arrangement introduced with the vacuum robot: one device produces a timing signal that tells the receiving device exactly when to sample each bit.</p>
+<p>Because the clock is transmitted along with the data, a synchronous controller can deliberately pause between bits, change its clock frequency between transactions, and coordinate an entire exchange without asking the target to infer the bit timing. SPI and I²C both use this principle, but they make different choices about wiring, device selection, direction, and bus ownership.</p>
+</section>
+<section id="serial-peripheral-interface" class="level2" data-number="7.10">
+<h2 data-number="7.10" class="anchored" data-anchor-id="serial-peripheral-interface"><span class="header-section-number">7.10</span> Serial Peripheral Interface</h2>
+<p>Serial Peripheral Interface, or SPI, is a synchronous protocol commonly used between a controller and nearby peripherals such as displays, analog-to-digital converters, flash memory, radio modules, and microSD cards. Unlike UART, SPI transmits a clock signal. The controller decides when each bit occurs and can change the clock rate between transactions as long as the peripheral limits are respected.</p>
+<section id="spi-signals" class="level3" data-number="7.10.1">
+<h3 data-number="7.10.1" class="anchored" data-anchor-id="spi-signals"><span class="header-section-number">7.10.1</span> SPI Signals</h3>
+<p>A conventional four-signal SPI connection contains a serial clock, a controller-output data signal, a controller-input data signal, and a chip-select signal. Signal names vary among manufacturers. SIMO and SOMI mean slave-in/master-out and slave-out/master-in in older terminology; MOSI and MISO are also common. Newer documentation may use controller and peripheral language. Regardless of the label, one data wire carries bits from the controller and the other carries bits back.</p>
+<div id="fig-ch07-4-26" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-26-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image48.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-26-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.26: A four-signal SPI connection provides a clock, two data directions, and a chip-select signal.
+</figcaption>
+</figure>
+</div>
+<p>SPI is inherently a shift-register exchange. Every clock cycle shifts one bit out of each device and one bit into each device. To read a register, the controller must still transmit something—often an address followed by dummy bytes—to generate the clock cycles that return the requested data. This behavior can be surprising after using UART, where receiving does not require simultaneous transmission.</p>
+<div id="fig-ch07-4-27" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-27-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image49.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-27-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.27: SPI timing shows the clock, controller-output data, and controller-input data during successive byte transfers.
+</figcaption>
+</figure>
+</div>
+<p>Notice that the target cannot decide to send an arbitrary number of bits whenever it wants. The controller owns the clock, so it must know when a response is expected and generate enough clock pulses to receive that response. A sensor datasheet normally specifies whether the first transferred byte is an address, a command, a dummy value, or returned data.</p>
+</section>
+<section id="clock-polarity-and-phase" class="level3" data-number="7.10.2">
+<h3 data-number="7.10.2" class="anchored" data-anchor-id="clock-polarity-and-phase"><span class="header-section-number">7.10.2</span> Clock Polarity and Phase</h3>
+<p>SPI does not define one universal sampling edge. Clock polarity determines whether the clock idles low or high. Clock phase determines whether data is captured on the first or second active edge. The four combinations are often called SPI modes 0 through 3. Both devices must use compatible polarity and phase settings. If they disagree, the receiver may sample while the transmitter is changing the bit, producing shifted or unstable data.</p>
+<p>A peripheral datasheet normally shows a timing diagram that identifies the idle level, capture edge, maximum clock frequency, setup time, and hold time. Those requirements should determine the USCI configuration. Selecting a mode because it worked for a different sensor is not a reliable method.</p>
+</section>
+<section id="selecting-one-of-several-peripherals" class="level3" data-number="7.10.3">
+<h3 data-number="7.10.3" class="anchored" data-anchor-id="selecting-one-of-several-peripherals"><span class="header-section-number">7.10.3</span> Selecting One of Several Peripherals</h3>
+<p>The clock and data wires may be shared among several SPI peripherals. The controller activates one device by driving its chip-select signal to the active level, commonly low. All other chip-select signals remain inactive so those devices ignore the clock and release their output connections. Each additional peripheral generally needs another GPIO chip-select pin.</p>
+<div id="fig-ch07-4-28" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-28-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image51.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-28-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.28: Several SPI peripherals share clock and data signals while using separate active-low select lines.
+</figcaption>
+</figure>
+</div>
+<p>Some devices support daisy chaining, in which the output of one shift register feeds the input of the next. Daisy chaining reduces the number of select signals but changes the transaction format and increases the number of clock cycles needed to reach a particular device. It should only be used when the peripheral explicitly supports it.</p>
+<div id="fig-ch07-4-29" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-29-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image52.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-29-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.29: An alternative SPI arrangement connects compatible peripherals in a chain and uses one shared select signal.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="spi-on-the-msp430g2553" class="level3" data-number="7.10.4">
+<h3 data-number="7.10.4" class="anchored" data-anchor-id="spi-on-the-msp430g2553"><span class="header-section-number">7.10.4</span> SPI on the MSP430G2553</h3>
+<p>Both USCI_A0 and USCI_B0 can operate in SPI mode. If USCI_A0 is already providing the UART connection to the computer, USCI_B0 is the natural choice for SPI. In USCI_B0 SPI mode, P1.5 provides UCB0CLK, P1.6 provides UCB0SOMI, and P1.7 provides UCB0SIMO. These same P1.6 and P1.7 pins are used for I²C, so USCI_B0 cannot provide SPI and I²C simultaneously.</p>
+<p>The following initialization configures USCI_B0 as an 8-bit, most-significant-bit-first SPI controller. UCCKPH and UCCKPL must be selected for the actual peripheral; the example uses UCCKPH with the default low clock polarity. P2.0 is used as a software-controlled active-low chip select.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">void</span> spi_init<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    P1SEL <span class="op">|=</span> BIT5 <span class="op">|</span> BIT6 <span class="op">|</span> BIT7<span class="op">;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    P1SEL2 <span class="op">|=</span> BIT5 <span class="op">|</span> BIT6 <span class="op">|</span> BIT7<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    P2DIR <span class="op">|=</span> BIT0<span class="op">;</span> <span class="co">// P2.0 is chip select</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    P2OUT <span class="op">|=</span> BIT0<span class="op">;</span> <span class="co">// deselect the peripheral</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">=</span> UCSWRST <span class="op">|</span> UCSSEL_2<span class="op">;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    UCB0CTL0 <span class="op">=</span> UCCKPH <span class="op">|</span> UCMSB <span class="op">|</span> UCMST <span class="op">|</span> UCSYNC<span class="op">;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    UCB0BR0 <span class="op">=</span> <span class="dv">2</span><span class="op">;</span> <span class="co">// 500-kHz clock from 1-MHz SMCLK</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>    UCB0BR1 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">&amp;=</span> <span class="op">~</span>UCSWRST<span class="op">;</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">unsigned</span> <span class="dt">char</span> spi_transfer<span class="op">(</span><span class="dt">unsigned</span> <span class="dt">char</span> value<span class="op">)</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0TXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    UCB0TXBUF <span class="op">=</span> value<span class="op">;</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0RXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> UCB0RXBUF<span class="op">;</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>A complete transaction drives P2.0 low, calls spi_transfer for every command, address, or data byte, waits until the final transfer is complete, and then drives P2.0 high. The returned value from each call is the byte shifted in during the same eight clock cycles. The meaning of those bytes comes from the peripheral datasheet, not from SPI itself.</p>
+</section>
+<section id="when-spi-is-a-good-choice" class="level3" data-number="7.10.5">
+<h3 data-number="7.10.5" class="anchored" data-anchor-id="when-spi-is-a-good-choice"><span class="header-section-number">7.10.5</span> When SPI Is a Good Choice</h3>
+<ul>
+<li><p>Use SPI when a nearby peripheral needs high throughput or predictable clocked timing.</p></li>
+<li><p>SPI is attractive for displays, fast ADCs, external flash memory, microSD cards, and many wireless modules.</p></li>
+<li><p>The protocol is simple in hardware and supports simultaneous shifting in both directions.</p></li>
+<li><p>The tradeoff is pin count: clock, two data signals, and usually one chip-select signal per peripheral.</p></li>
+<li><p>SPI provides no universal addressing, acknowledgment, or error detection; those features must come from the peripheral-specific command format.</p></li>
+</ul>
+</section>
+<section id="real-world-example-wi-fi-and-microsd" class="level3" data-number="7.10.6">
+<h3 data-number="7.10.6" class="anchored" data-anchor-id="real-world-example-wi-fi-and-microsd"><span class="header-section-number">7.10.6</span> Real-World Example: Wi-Fi and microSD</h3>
+<p>A Wi-Fi module may need to move command packets and network data faster than a low-rate UART can comfortably support. SPI provides a controller-driven clock and efficient full-duplex transfers while keeping the interface simple. A microSD card can also operate through SPI mode. The card command protocol defines initialization, block addressing, responses, and data tokens on top of the basic SPI signals.</p>
+<div id="fig-ch07-4-30" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-30-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image53.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-30-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.30: Wi-Fi modules and microSD breakout boards illustrate practical high-throughput SPI peripherals.
+</figcaption>
+</figure>
+</div>
+<p>These applications reveal an important distinction: a serial bus defines how bits move, while a device protocol defines what the bits mean. Correct SPI polarity and timing are necessary, but they are not enough. Software must also implement the command sequence required by the Wi-Fi module or storage card.</p>
+</section>
+</section>
+<section id="inter-integrated-circuit" class="level2" data-number="7.11">
+<h2 data-number="7.11" class="anchored" data-anchor-id="inter-integrated-circuit"><span class="header-section-number">7.11</span> Inter-Integrated Circuit</h2>
+<p>The Inter-Integrated Circuit bus, written I²C and pronounced “I-squared-C,” is a synchronous, addressed, half-duplex protocol. It uses only two shared signal wires: SCL for the clock and SDA for data. A controller initiates communication, supplies the clock, and selects a target by transmitting its address. Multiple targets can share the same two wires as long as their addresses do not conflict and the total electrical loading remains within specification.</p>
+<section id="open-drain-signaling-and-pull-up-resistors" class="level3" data-number="7.11.1">
+<h3 data-number="7.11.1" class="anchored" data-anchor-id="open-drain-signaling-and-pull-up-resistors"><span class="header-section-number">7.11.1</span> Open-Drain Signaling and Pull-Up Resistors</h3>
+<p>I²C devices do not actively drive the bus high. Their outputs behave as open-drain switches that can either pull a signal low or release it. External pull-up resistors return the released wires to a high voltage. This arrangement allows several devices to share the bus safely: if any device pulls a line low, the bus is low. No device attempts to force the line high against another device that is pulling low.</p>
+<div id="fig-ch07-4-31" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-31-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image54.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-31-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.31: An I²C bus connects one controller and several targets through shared SCL and SDA signals with external pull-up resistors.
+</figcaption>
+</figure>
+</div>
+<p>The pull-up resistance and bus capacitance determine how quickly a released line rises. A large resistance reduces current but slows the edge. A small resistance improves rise time but increases current whenever a device pulls the line low. Long wires, many devices, and large connector structures add capacitance and can prevent the bus from meeting its timing requirement even when the register configuration is correct.</p>
+</section>
+<section id="following-an-i²c-transaction" class="level3" data-number="7.11.2">
+<h3 data-number="7.11.2" class="anchored" data-anchor-id="following-an-i²c-transaction"><span class="header-section-number">7.11.2</span> Following an I²C Transaction</h3>
+<p>An I²C transaction is more structured than a basic UART character or SPI shift-register exchange. The controller must announce the beginning of the transaction, identify the target device, indicate the direction of transfer, check whether each byte was accepted, and release the bus at the end. The waveform below shows these stages together; the next subsections explain them one at a time.</p>
+<div id="fig-ch07-4-32" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-32-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image55.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-32-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.32: I²C timing identifies START, the 7-bit address, the direction bit, acknowledgments, data, and STOP.
+</figcaption>
+</figure>
+</div>
+<section id="start-condition" class="level4">
+<h4 class="anchored" data-anchor-id="start-condition">START Condition</h4>
+<p>An I²C transfer begins with a START condition. While SCL remains high, the controller pulls SDA from high to low. Every device on the shared bus can recognize this unusual transition because ordinary data bits are changed while the clock is low. START therefore tells the targets that an address frame is about to follow.</p>
+</section>
+<section id="address-frame-and-direction-bit" class="level4">
+<h4 class="anchored" data-anchor-id="address-frame-and-direction-bit">Address Frame and Direction Bit</h4>
+<p>After START, the controller transmits the seven-bit target address, most-significant bit first. An eighth bit specifies the direction: 0 requests a write from controller to target, while 1 requests a read from target to controller. A device whose configured address matches the transmitted address participates in the remainder of the transfer; devices with other addresses ignore it.</p>
+<p>A seven-bit address creates 128 possible bit patterns, but some values are reserved, so not all 128 represent ordinary usable peripheral addresses. The practical number of devices on a bus is also constrained by duplicate fixed addresses and by the total capacitance contributed by devices, traces, and cables.</p>
+</section>
+<section id="acknowledgment-bit" class="level4">
+<h4 class="anchored" data-anchor-id="acknowledgment-bit">Acknowledgment Bit</h4>
+<p>Every eight transmitted bits are followed by a ninth clock pulse reserved for acknowledgment. The transmitting device releases SDA, allowing the receiving device to pull it low if the byte was accepted. A low SDA value during this clock pulse is an acknowledgment, or ACK. If SDA remains high, the result is a negative acknowledgment, or NACK.</p>
+<p>A NACK may mean that no device recognized the address, that a target is busy or unable to accept another byte, or that a controller has reached the final byte of a read. A program should not assume that an I²C target is present merely because it requested a transaction; acknowledgment is the evidence that another device actually participated.</p>
+</section>
+<section id="data-frames" class="level4">
+<h4 class="anchored" data-anchor-id="data-frames">Data Frames</h4>
+<p>After the address is acknowledged, the controller continues producing SCL pulses for the data bytes. During a write, the controller places each data bit on SDA. During a read, the addressed target places its data on SDA while the controller still generates the clock. Each group of eight data bits is followed by another acknowledgment clock. The physical bus is shared, so only one device supplies a given data bit at a time.</p>
+</section>
+<section id="stop-and-repeated-start" class="level4">
+<h4 class="anchored" data-anchor-id="stop-and-repeated-start">STOP and Repeated START</h4>
+<p>The controller normally ends a transaction by generating STOP: SDA changes from low to high while SCL remains high. This transition releases the bus and tells the targets that the message is complete. The controller may instead issue another START without first generating STOP. This repeated START keeps control of the bus while beginning a new address phase, which is useful when one logical operation contains both a write and a read.</p>
+</section>
+</section>
+<section id="writing-a-target-register" class="level3" data-number="7.11.3">
+<h3 data-number="7.11.3" class="anchored" data-anchor-id="writing-a-target-register"><span class="header-section-number">7.11.3</span> Writing a Target Register</h3>
+<p>Many I²C sensors organize their settings and measurements as internal registers. To write a register, the controller addresses the target in the write direction, transmits the internal register address, and then transmits the new value. Each byte is acknowledged. For example, writing 0x00 to register 0x6B of an MPU6050 wakes the device from its default sleep state.</p>
+<div id="fig-ch07-4-33" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-33-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image56.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-33-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.33: A register-write transaction separates the target address, internal register address, data byte, and acknowledgments.
+</figcaption>
+</figure>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>START <span class="op">|</span> <span class="bn">0x68</span> <span class="op">+</span> WRITE <span class="op">|</span> ACK <span class="op">|</span> <span class="bn">0x6B</span> <span class="op">|</span> ACK <span class="op">|</span> <span class="bn">0x00</span> <span class="op">|</span> ACK <span class="op">|</span> STOP</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</section>
+<section id="reading-a-target-register" class="level3" data-number="7.11.4">
+<h3 data-number="7.11.4" class="anchored" data-anchor-id="reading-a-target-register"><span class="header-section-number">7.11.4</span> Reading a Target Register</h3>
+<p>A register read usually begins as a write because the controller must first tell the target which internal register is desired. After transmitting the register address, the controller issues a repeated START and sends the target address again with the read bit set. The target then returns one or more data bytes. The controller acknowledges every byte it wants to continue receiving and NACKs the final byte before generating STOP.</p>
+<div id="fig-ch07-4-34" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-34-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image57.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-34-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.34: A register-read transaction includes the internal register address, repeated START, direction change, returned data, and final NACK.
+</figcaption>
+</figure>
+</div>
+<p>The repeated START is not an arbitrary complication. If the controller issued STOP between the register-address phase and the read phase, another controller could claim the bus or the target could interpret the operations as unrelated transactions. Keeping the bus active makes the two phases one atomic operation.</p>
+</section>
+<section id="i²c-on-the-msp430g2553" class="level3" data-number="7.11.5">
+<h3 data-number="7.11.5" class="anchored" data-anchor-id="i²c-on-the-msp430g2553"><span class="header-section-number">7.11.5</span> I²C on the MSP430G2553</h3>
+<p>USCI_B0 provides the I²C hardware. P1.6 is UCB0SCL and P1.7 is UCB0SDA. Both P1SEL and P1SEL2 must select the peripheral functions. In controller mode, UCMST enables controller operation, UCMODE_3 selects I²C, and UCSYNC selects synchronous operation. UCB0BR0 and UCB0BR1 divide SMCLK to create SCL. With a 1-MHz SMCLK and a divider of ten, the nominal SCL frequency is 100 kHz.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">void</span> i2c_init<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    P1SEL <span class="op">|=</span> BIT6 <span class="op">|</span> BIT7<span class="op">;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    P1SEL2 <span class="op">|=</span> BIT6 <span class="op">|</span> BIT7<span class="op">;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">=</span> UCSWRST <span class="op">|</span> UCSSEL_2<span class="op">;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    UCB0CTL0 <span class="op">=</span> UCMST <span class="op">|</span> UCMODE_3 <span class="op">|</span> UCSYNC<span class="op">;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    UCB0BR0 <span class="op">=</span> <span class="dv">10</span><span class="op">;</span> <span class="co">// 100-kHz SCL from 1-MHz SMCLK</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    UCB0BR1 <span class="op">=</span> <span class="dv">0</span><span class="op">;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">&amp;=</span> <span class="op">~</span>UCSWRST<span class="op">;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Unlike UART, the target address is part of each I²C transaction. The unshifted 7-bit address is written to UCB0I2CSA. The USCI hardware places the address and direction bit on the bus when software requests a START condition.</p>
+</section>
+<section id="real-world-example-an-impact-detecting-hard-hat" class="level3" data-number="7.11.6">
+<h3 data-number="7.11.6" class="anchored" data-anchor-id="real-world-example-an-impact-detecting-hard-hat"><span class="header-section-number">7.11.6</span> Real-World Example: An Impact-Detecting Hard Hat</h3>
+<p>Consider a smart construction hard hat designed to report a potentially dangerous impact. When an object strikes the helmet, the shell experiences a sudden change in acceleration. A small embedded controller can monitor that acceleration and decide whether the event exceeds a threshold that should trigger an alarm or wireless notification.</p>
+<p>The controller could measure an analog acceleration signal directly, but many practical sensing devices include their own measurement electronics and expose the result through a digital interface. The system then needs a serial connection between the main microcontroller and the sensor. I²C is attractive because it uses only two signal wires, allows the controller to configure the sensor through internal registers, and supports additional sensors on the same bus.</p>
+<section id="what-the-accelerometer-measures" class="level4">
+<h4 class="anchored" data-anchor-id="what-the-accelerometer-measures">What the Accelerometer Measures</h4>
+<p>An accelerometer measures acceleration along one or more physical axes. A three-axis device reports separate X, Y, and Z values, allowing software to estimate both the direction and magnitude of an event. In a simplified physical model, a small internal mass responds to acceleration; the sensor converts the resulting displacement or force into an electrical measurement, which on-chip circuitry digitizes.</p>
+<div id="fig-ch07-4-35" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-35-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image58.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-35-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.35: Three-axis accelerometer orientation is related to a simplified mass-and-sensor measurement mechanism.
+</figcaption>
+</figure>
+</div>
+</section>
+</section>
+<section id="example-reading-the-mpu6050-accelerometer" class="level3" data-number="7.11.7">
+<h3 data-number="7.11.7" class="anchored" data-anchor-id="example-reading-the-mpu6050-accelerometer"><span class="header-section-number">7.11.7</span> Example: Reading the MPU6050 Accelerometer</h3>
+<p>The MPU6050 is an inertial measurement unit containing a three-axis accelerometer and a three-axis gyroscope. It commonly uses the 7-bit address 0x68 when its AD0 address pin is low. The acceleration measurements begin at internal register 0x3B, with the high and low bytes of the X-axis measurement stored in consecutive registers.</p>
+<div id="fig-ch07-4-36" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-36-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image59.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-36-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.36: The MPU6050 package includes serial-interface pins and defined measurement axes.
+</figcaption>
+</figure>
+</div>
+<p>For the impact-detecting hard hat, the MSP430 first configures the sensor and then reads consecutive acceleration registers. A practical application could periodically measure all three axes, combine them into an overall acceleration magnitude, and compare the result with a threshold. The chapter example concentrates on the serial transaction itself: select the measurement register, issue a repeated START, and retrieve the high and low bytes.</p>
+<p>The following example shows the central transaction logic. Error handling is intentionally omitted so the bus sequence remains visible. Production code should detect NACK, arbitration, and bus-stuck conditions and should use timeouts rather than wait forever.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode c code-with-copy"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="pp">#define MPU6050_ADDRESS </span><span class="bn">0x68</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="pp">#define ACCEL_XOUT_H </span><span class="bn">0x3B</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="dt">static</span> <span class="dt">int</span> i2c_read_accel_x<span class="op">(</span><span class="dt">void</span><span class="op">)</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">char</span> high<span class="op">;</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">unsigned</span> <span class="dt">char</span> low<span class="op">;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>UCB0CTL1 <span class="op">&amp;</span> UCTXSTP<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    UCB0I2CSA <span class="op">=</span> MPU6050_ADDRESS<span class="op">;</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Write the internal register address.</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">|=</span> UCTR <span class="op">|</span> UCTXSTT<span class="op">;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0TXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    UCB0TXBUF <span class="op">=</span> ACCEL_XOUT_H<span class="op">;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0TXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Change direction with a repeated START.</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">&amp;=</span> <span class="op">~</span>UCTR<span class="op">;</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">|=</span> UCTXSTT<span class="op">;</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">(</span>UCB0CTL1 <span class="op">&amp;</span> UCTXSTT<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0RXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>    <span class="co">// Tell USCI that the next byte will be the final byte.</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>    UCB0CTL1 <span class="op">|=</span> UCTXSTP<span class="op">;</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    high <span class="op">=</span> UCB0RXBUF<span class="op">;</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="op">((</span>IFG2 <span class="op">&amp;</span> UCB0RXIFG<span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    low <span class="op">=</span> UCB0RXBUF<span class="op">;</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="op">(</span><span class="dt">int</span><span class="op">)((</span>high <span class="op">&lt;&lt;</span> <span class="dv">8</span><span class="op">)</span> <span class="op">|</span> low<span class="op">);</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The two received bytes are combined into one signed 16-bit quantity. Because high and low are promoted to int before the shift and OR, the resulting bit pattern can be cast to a signed 16-bit type in a program that includes stdint.h. The raw value must then be scaled according to the accelerometer range configured in the MPU6050.</p>
+</section>
+<section id="real-world-example-a-mattress-sensor-array" class="level3" data-number="7.11.8">
+<h3 data-number="7.11.8" class="anchored" data-anchor-id="real-world-example-a-mattress-sensor-array"><span class="header-section-number">7.11.8</span> Real-World Example: A Mattress Sensor Array</h3>
+<p>A pressure-mapping mattress may contain dozens or hundreds of pressure and temperature sensors. Giving every sensor a dedicated group of wires would be impractical. I²C allows many addressed devices to share SCL and SDA, so the wiring does not grow by one complete bus for every sensor. Local sensor hubs can also collect data from small regions and expose one address to the main controller.</p>
+<div id="fig-ch07-4-37" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-37-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image61.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-37-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.37: A pressure-mapping mattress generates pressure and temperature images from a dense sensor array.
+</figcaption>
+</figure>
+</div>
+<p>This example also reveals an I²C limitation. Adding devices and cable length increases capacitance, which slows the rising edges produced by the pull-up resistors. A large physical array may need bus buffers, multiple segments, slower clocking, or local controllers rather than one enormous bus.</p>
+</section>
+<section id="real-world-example-an-io-expander" class="level3" data-number="7.11.9">
+<h3 data-number="7.11.9" class="anchored" data-anchor-id="real-world-example-an-io-expander"><span class="header-section-number">7.11.9</span> Real-World Example: An I/O Expander</h3>
+<p>A design sometimes needs more digital inputs and outputs than the microcontroller package provides. An I²C I/O expander uses one bus address and a small set of internal registers to control additional pins. Two microcontroller signals can therefore control banks of LEDs, read a keypad, monitor switches, or operate relays.</p>
+<div id="fig-ch07-4-38" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-38-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image62.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-38-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.38: An I²C I/O expander trades two bus signals for a larger bank of remotely controlled GPIO pins.
+</figcaption>
+</figure>
+</div>
+<div id="fig-ch07-4-39" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-39-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image63.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-39-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.39: A 16-bit I²C I/O expander adds many digital signals using a two-wire bus.
+</figcaption>
+</figure>
+</div>
+<p>The added pins are not identical to native GPIO. Every change requires an I²C transaction, so the latency is longer and the maximum update rate is lower. A target cannot initiate an I²C transaction without a controller clock, so many expanders include a separate interrupt output to notify the microcontroller that an input changed.</p>
+</section>
+<section id="when-i²c-is-a-good-choice" class="level3" data-number="7.11.10">
+<h3 data-number="7.11.10" class="anchored" data-anchor-id="when-i²c-is-a-good-choice"><span class="header-section-number">7.11.10</span> When I²C Is a Good Choice</h3>
+<ul>
+<li><p>Use I²C for configuration registers and moderate-rate sensors located near the controller.</p></li>
+<li><p>Addressing allows many targets to share two signal wires.</p></li>
+<li><p>Acknowledgments reveal whether an address or data byte was accepted.</p></li>
+<li><p>Open-drain signaling requires pull-up resistors and creates a rise-time limit.</p></li>
+<li><p>The shared half-duplex bus is generally slower and more software-intensive than a simple SPI exchange.</p></li>
+<li><p>Address conflicts occur when two targets use the same fixed address unless a multiplexer or alternate address is available.</p></li>
+</ul>
+</section>
+</section>
+<section id="controller-area-network" class="level2" data-number="7.12">
+<h2 data-number="7.12" class="anchored" data-anchor-id="controller-area-network"><span class="header-section-number">7.12</span> Controller Area Network</h2>
+<p>Controller Area Network, or CAN, is an asynchronous multi-controller serial bus developed for reliable communication among distributed electronic control units. It is strongly associated with vehicles, but it is also used in industrial equipment, robotics, medical devices, and other systems where noise immunity and fault detection matter.</p>
+<p>CAN is not a point-to-point character stream like UART. Every node monitors the same bus, and a frame carries an identifier that describes the message rather than a destination address. A node can publish a wheel-speed message, for example, and any interested node can receive it. Hardware acceptance filters allow a controller to ignore identifiers it does not need.</p>
+<div id="fig-ch07-4-40" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-40-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image64.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-40-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.40: Several vehicle control units share CAN_H and CAN_L while deciding which messages to accept.
+</figcaption>
+</figure>
+</div>
+<p>This returns us to the vehicle example that opened the chapter. The engine controller, braking controller, steering controller, and other subsystems do not need a separate dedicated wire for every value sent between every pair of devices. Instead, they publish structured messages on a shared communication network. CAN provides the physical signaling, message organization, arbitration, and error handling that make this arrangement practical.</p>
+<section id="differential-signaling" class="level3" data-number="7.12.1">
+<h3 data-number="7.12.1" class="anchored" data-anchor-id="differential-signaling"><span class="header-section-number">7.12.1</span> Differential Signaling</h3>
+<p>A high-speed CAN physical layer uses two wires, CAN_H and CAN_L, arranged as a twisted pair. The receiver interprets the difference between the wire voltages. External noise that couples similarly into both wires changes their absolute voltages but leaves much of the difference unchanged. This common-mode rejection makes differential signaling valuable in electrically noisy environments.</p>
+<div id="fig-ch07-4-41" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-41-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image65.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-41-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.41: A CAN waveform distinguishes dominant and recessive bits using the difference between CAN_H and CAN_L.
+</figcaption>
+</figure>
+</div>
+<p>When the bus is recessive, the two wires remain close to the same voltage, often approximately 2.5 V in a high-speed CAN implementation. A dominant bit drives CAN_H higher and CAN_L lower, increasing the voltage difference. Receivers identify the bit from this differential voltage rather than treating either individual wire as an ordinary single-ended GPIO signal.</p>
+<p>A CAN controller does not connect directly to the twisted pair. A transceiver converts the controller’s digital transmit and receive signals into the differential bus voltages. Termination resistors are installed at both physical ends of the bus to absorb signal energy and reduce reflections. The bus should be wired as a line with short stubs rather than as an arbitrary star.</p>
+<div id="fig-ch07-4-42" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-42-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image66.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-42-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.42: Termination places a 120-ohm resistor at each physical end of a high-speed CAN bus.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="the-classical-can-frame" class="level3" data-number="7.12.2">
+<h3 data-number="7.12.2" class="anchored" data-anchor-id="the-classical-can-frame"><span class="header-section-number">7.12.2</span> The Classical CAN Frame</h3>
+<p>A Classical CAN data frame includes a start-of-frame bit, an identifier, control information, zero to eight data bytes, a cyclic-redundancy check, acknowledgment, and end-of-frame bits. Standard CAN uses an 11-bit identifier; extended CAN uses a 29-bit identifier. The identifier labels the meaning and priority of the message rather than identifying the physical destination of the frame.</p>
+<div id="fig-ch07-4-43" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-43-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image67.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-43-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.43: A Classical CAN frame identifies the arbitration, control, payload, CRC, acknowledgment, and end-of-frame fields.
+</figcaption>
+</figure>
+</div>
+<section id="start-of-frame-identifier-and-arbitration" class="level4">
+<h4 class="anchored" data-anchor-id="start-of-frame-identifier-and-arbitration">Start of Frame, Identifier, and Arbitration</h4>
+<p>A dominant start-of-frame bit announces that a node intends to transmit and provides a synchronization edge for the other nodes. The identifier follows. For example, identifier 0x100 might represent engine speed, 0x200 might represent wheel speed, and 0x300 might represent coolant temperature. All nodes observe the message, but each node uses its acceptance filters to decide whether the information is relevant.</p>
+<p>Several nodes may begin transmitting at the same time. CAN resolves this using non-destructive bitwise arbitration: a dominant 0 overrides a recessive 1 on the shared bus. Each transmitter monitors the actual bus level. A node that sends recessive but observes dominant knows that another node has higher priority and immediately stops transmitting. The message with the lower numerical identifier continues without being corrupted.</p>
+<div id="fig-ch07-4-44" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-44-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image68.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-44-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.44: CAN arbitration causes a node to stop transmitting when its recessive identifier bit loses to another node’s dominant bit.
+</figcaption>
+</figure>
+</div>
+</section>
+<section id="rtr-ide-reserved-bits-and-data-length" class="level4">
+<h4 class="anchored" data-anchor-id="rtr-ide-reserved-bits-and-data-length">RTR, IDE, Reserved Bits, and Data Length</h4>
+<p>The remote transmission request, or RTR, distinguishes a frame carrying data from a request for data in Classical CAN. The identifier extension bit, IDE, distinguishes the standard 11-bit identifier format from the extended 29-bit format. A reserved bit, commonly labeled r0, is maintained according to the Classical CAN specification. The four-bit data length code, DLC, indicates how many data bytes appear in the payload.</p>
+</section>
+<section id="data-crc-acknowledgment-and-end-of-frame" class="level4">
+<h4 class="anchored" data-anchor-id="data-crc-acknowledgment-and-end-of-frame">Data, CRC, Acknowledgment, and End of Frame</h4>
+<p>The data field carries zero to eight payload bytes in Classical CAN. The payload interpretation is defined by the application: a pair of bytes might represent wheel speed, temperature, motor current, or another measurement. The cyclic-redundancy check allows receivers to verify that the protected frame contents arrived without detectable corruption.</p>
+<p>For acknowledgment, the transmitter releases an acknowledgment slot as recessive. Any receiver that successfully validated the frame can drive that slot dominant to confirm reception. A transmitter that observes no dominant acknowledgment knows that the frame was not accepted. The end-of-frame field consists of seven recessive bits, marking completion and allowing the bus to return to its idle state.</p>
+</section>
+<section id="bit-timing-and-stuff-bits" class="level4">
+<h4 class="anchored" data-anchor-id="bit-timing-and-stuff-bits">Bit Timing and Stuff Bits</h4>
+<p>Although CAN uses two physical wires, it does not carry a separate clock. Every node is configured for the same nominal bit rate, and edges in the transmitted signal allow receivers to keep their internal sampling clocks aligned. A long unbroken sequence of identical bits would remove those useful synchronization edges.</p>
+<p>Bit stuffing solves that problem by inserting an opposite-polarity bit after a run of five identical transmitted bits in the stuffed portion of a Classical CAN frame. The receiver removes the inserted bit before interpreting the message. The detailed frame below shows how identifier, control, payload, CRC, acknowledgment, and physical-layer waveforms relate to one another.</p>
+<div id="fig-ch07-4-45" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ch07-4-45-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="../images/ch07/image69.png" class="img-fluid figure-img">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ch07-4-45-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7.45: A detailed CAN frame aligns logical fields, the received bitstream, and the differential CAN_H/CAN_L waveforms.
+</figcaption>
+</figure>
+</div>
+<p>CRC checks, acknowledgment, transmit monitoring, format checks, and error counters work together to detect faults and prevent a failing node from permanently disrupting the network. These features make CAN more complex than UART, but they support the reliability needed when many distributed controllers share a noisy physical environment.</p>
+</section>
+</section>
+<section id="using-can-with-the-msp430g2553" class="level3" data-number="7.12.3">
+<h3 data-number="7.12.3" class="anchored" data-anchor-id="using-can-with-the-msp430g2553"><span class="header-section-number">7.12.3</span> Using CAN with the MSP430G2553</h3>
+<p>The MSP430G2553 does not contain an integrated CAN controller. CAN can still be added with an external controller connected through SPI and a separate CAN transceiver connected to the differential bus. This solution uses more components and software than a microcontroller with built-in CAN, but it is appropriate when the MSP430 remains suitable for the rest of the application.</p>
+<p>This example emphasizes the difference among three layers. SPI carries bytes between the MSP430 and the external CAN controller. The CAN controller creates, receives, filters, and checks CAN frames. The transceiver produces and senses the CAN_H and CAN_L voltages. Calling all three components “the CAN interface” can obscure which part is responsible for a failure.</p>
+</section>
+</section>
+<section id="choosing-a-serial-protocol" class="level2" data-number="7.13">
+<h2 data-number="7.13" class="anchored" data-anchor-id="choosing-a-serial-protocol"><span class="header-section-number">7.13</span> Choosing a Serial Protocol</h2>
+<p>There is no universally best serial protocol. A designer should begin with the communication relationship and physical environment rather than personal familiarity. The number of devices, required throughput, distance, noise, pin budget, direction of communication, error-detection needs, and availability of compatible hardware all influence the decision.</p>
+<section id="choose-uart-when" class="level3" data-number="7.13.1">
+<h3 data-number="7.13.1" class="anchored" data-anchor-id="choose-uart-when"><span class="header-section-number">7.13.1</span> Choose UART When</h3>
+<ul>
+<li><p>Two devices need a simple point-to-point connection.</p></li>
+<li><p>The devices can agree on a fixed baud rate and frame format.</p></li>
+<li><p>Human-readable debugging through a terminal is valuable.</p></li>
+<li><p>A separate clock wire is undesirable and moderate throughput is sufficient.</p></li>
+</ul>
+</section>
+<section id="choose-spi-when" class="level3" data-number="7.13.2">
+<h3 data-number="7.13.2" class="anchored" data-anchor-id="choose-spi-when"><span class="header-section-number">7.13.2</span> Choose SPI When</h3>
+<ul>
+<li><p>Peripherals are close to the controller and high throughput is important.</p></li>
+<li><p>The controller can dedicate clock, data, and chip-select pins.</p></li>
+<li><p>Full-duplex shifting or precise controller-generated timing is useful.</p></li>
+<li><p>The device command protocol supplies any needed addressing and checking.</p></li>
+</ul>
+</section>
+<section id="choose-i²c-when" class="level3" data-number="7.13.3">
+<h3 data-number="7.13.3" class="anchored" data-anchor-id="choose-i²c-when"><span class="header-section-number">7.13.3</span> Choose I²C When</h3>
+<ul>
+<li><p>Several moderate-speed devices should share two wires.</p></li>
+<li><p>The targets provide unique or configurable addresses.</p></li>
+<li><p>The bus is short enough to satisfy capacitance and rise-time limits.</p></li>
+<li><p>Register-oriented sensor and configuration traffic dominates.</p></li>
+</ul>
+</section>
+<section id="choose-can-when" class="level3" data-number="7.13.4">
+<h3 data-number="7.13.4" class="anchored" data-anchor-id="choose-can-when"><span class="header-section-number">7.13.4</span> Choose CAN When</h3>
+<ul>
+<li><p>Many controllers need to publish and receive messages on one robust network.</p></li>
+<li><p>The electrical environment is noisy or the wiring extends beyond one circuit board.</p></li>
+<li><p>Priority arbitration, hardware filtering, and strong fault detection are required.</p></li>
+<li><p>The design can include a CAN controller and physical-layer transceiver.</p></li>
+</ul>
+<p>A real system often uses several protocols at once. A robot may use I²C for low-rate sensors, SPI for a display and flash memory, UART for a debug console, and CAN for communication between major control units. The protocols are complementary tools, not mutually exclusive architectural philosophies.</p>
+</section>
+</section>
+<section id="recap" class="level2" data-number="7.14">
+<h2 data-number="7.14" class="anchored" data-anchor-id="recap"><span class="header-section-number">7.14</span> Recap</h2>
+<p>In this chapter we learned:</p>
+<ul>
+<li><p>Serial communication reduces pin and wiring requirements by transmitting bits over time.</p></li>
+<li><p>Synchronous protocols transmit a clock; asynchronous UART reconstructs timing from an agreed baud rate.</p></li>
+<li><p>UART frames data with start, data, optional parity, and stop bits.</p></li>
+<li><p>The MSP430G2553 uses USCI_A0 for UART and exposes UCA0RXD on P1.1 and UCA0TXD on P1.2.</p></li>
+<li><p>Polling is simple, while interrupts and software buffers allow the processor to perform other work.</p></li>
+<li><p>SPI exchanges bits in both directions under a controller-generated clock and selects targets with chip-select signals.</p></li>
+<li><p>I²C uses addressed, open-drain SCL and SDA signals with an acknowledgment after every byte.</p></li>
+<li><p>Repeated START conditions allow an I²C register read to change direction without releasing the bus.</p></li>
+<li><p>CAN combines differential signaling, message identifiers, arbitration, and extensive error detection.</p></li>
+<li><p>The MSP430G2553 needs an external CAN controller and transceiver to join a CAN network.</p></li>
+<li><p>Protocol selection depends on topology, speed, distance, robustness, pin budget, and device support.</p></li>
+</ul>
+</section>
+<section id="review-questions" class="level2" data-number="7.15">
+<h2 data-number="7.15" class="anchored" data-anchor-id="review-questions"><span class="header-section-number">7.15</span> Review Questions</h2>
+<ol type="1">
+<li><p>How can the vacuum robot divide bump sensing, motor control, and encoder feedback between two microcontrollers?</p></li>
+<li><p>Which eight GPIO levels represent decimal 21, and why can the receiver not distinguish the sequence 21, 21, 10 using data levels alone?</p></li>
+<li><p>How does adding a clock wire solve the repeated-value problem, and why might designers then replace eight data wires with one?</p></li>
+<li><p>What electrical problem occurs if two push-pull GPIO outputs drive opposing values on the same shared wire?</p></li>
+<li><p>Why does a parallel bus become difficult to route and time as its width and speed increase?</p></li>
+<li><p>How does a UART receiver determine when to sample a bit without a transmitted clock?</p></li>
+<li><p>How long does one 8N1 frame require at 115200 baud? What is the maximum payload byte rate?</p></li>
+<li><p>Why must TX and RX be crossed in a point-to-point UART connection?</p></li>
+<li><p>What is the difference between UCA0TXIFG and transmission complete?</p></li>
+<li><p>Why does an SPI controller transmit a dummy byte when it only wants to receive?</p></li>
+<li><p>What happens if two SPI peripherals drive the shared input line at the same time?</p></li>
+<li><p>Why can several I²C devices safely pull SDA low without shorting one output against another?</p></li>
+<li><p>Describe the sequence required to read two bytes from an I²C target register.</p></li>
+<li><p>Why does bus capacitance limit the physical size of an I²C network?</p></li>
+<li><p>How could an MSP430 and MPU6050 cooperate to detect a potentially dangerous impact on a smart hard hat?</p></li>
+<li><p>How does CAN arbitration allow the highest-priority frame to continue without corruption?</p></li>
+<li><p>Which protocol would you choose for a terminal, a microSD card, a temperature sensor array, and communication among vehicle controllers? Explain each choice.</p></li>
+</ol>
+</section>
+<section id="references" class="level2" data-number="7.16">
+<h2 data-number="7.16" class="anchored" data-anchor-id="references"><span class="header-section-number">7.16</span> References</h2>
+<p>Texas Instruments. MSP430G2x53, MSP430G2x13 Mixed-Signal Microcontrollers Data Sheet, SLAS735.</p>
+<p>Texas Instruments. MSP430F2xx, MSP430G2xx Family User’s Guide, SLAU144K, revised August 2022. https://www.ti.com/lit/ug/slau144k/slau144k.pdf</p>
+<p>Texas Instruments. MSP-EXP430G2 LaunchPad Experimenter Board User’s Guide, SLAU318.</p>
+<p>NXP Semiconductors. I²C-bus Specification and User Manual, UM10204. https://www.nxp.com/docs/en/user-guide/UM10204.pdf</p>
+<p>Bosch. CAN Protocols and CAN Controller IP Documentation. https://www.bosch-semiconductors.com/products/ip-modules/can-protocols/</p>
+<p>TDK InvenSense. MPU-6000 and MPU-6050 Product Specification and Register Map.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../chapters/06-adc.html" class="pagination-link" aria-label="Analog-to-Digital Conversion (ADC)">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Analog-to-Digital Conversion (ADC)</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>Embedded Systems with the MSP430G2553</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with Quarto</p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>
