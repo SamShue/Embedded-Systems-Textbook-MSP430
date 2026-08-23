@@ -26,4 +26,5 @@ The book is split into parts, each grouping related chapters:
 This book is adapted from an earlier Microsoft Word draft of the same
 material. The original drafts and supporting diagram source files (`.pptx`)
 are kept for reference under `Archive/TI-MSP430G2553/`. See the project
-[README](../README.md) for details on how this Quarto version was produced.
+[README](https://github.com/SamShue/Embedded-Systems-Textbook-MSP430#readme)
+for details on how this Quarto version was produced.
