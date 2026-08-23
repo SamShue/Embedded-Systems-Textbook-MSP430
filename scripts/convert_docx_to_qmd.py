@@ -59,6 +59,7 @@ CHAPTERS = [
     Chapter(3, "gpio", "General Purpose Input/Output (GPIO)", "CH03 - GPIO"),
     Chapter(4, "embedded-programming", "Embedded Programming", "CH04 - Embedded Programming"),
     Chapter(5, "timers", "Timers", "CH05 - Timers", references=FURBY_REFERENCE),
+    Chapter(7, "serial-communication", "Serial Communication", "CH07 - Serial Communication"),
 ]
 
 
@@ -213,8 +214,14 @@ def convert_code_divs(text: str) -> str:
 
 
 FIGURE_PATTERN = re.compile(
-    r'!\[[^\]]*\]\([^()]*?/media/(?P<file>[^)]+?)\)(?:\{[^}]*\})?\n\n'
+    r'!\[[^\]]*\]\([^()]*?/media/(?P<file>[^ )"]+)(?:\s+"[^"]*")?\)(?:\{[^}]*\})?\n\n'
     r'\*\*Figure\s+(?P<num>\d+)\.(?P<sub>\d+):\*\*\s*(?P<cap>[^\n]+)'
+)
+# Some drafts use an italic caption (`*Figure N.M: caption*`) instead of a bold
+# one (`**Figure N.M:** caption`); the whole caption sits inside the asterisks.
+FIGURE_PATTERN_ITALIC = re.compile(
+    r'!\[[^\]]*\]\([^()]*?/media/(?P<file>[^ )"]+)(?:\s+"[^"]*")?\)(?:\{[^}]*\})?\n\n'
+    r'\*Figure\s+(?P<num>\d+)\.(?P<sub>\d+):\s*(?P<cap>.+?)\*(?=\n|$)'
 )
 MEDIA_PATH_RE = re.compile(r"\([^()]*?/media/([^)]+)\)")
 BRACKET_CITE_RE = re.compile(r"\\\[(\d+)\\\]")
@@ -230,6 +237,7 @@ def rewrite_images(text: str, chapter: Chapter) -> str:
         return f"![{cap}](../images/ch{chnum}/{file}){{#{label}}}"
 
     text = FIGURE_PATTERN.sub(fig_repl, text)
+    text = FIGURE_PATTERN_ITALIC.sub(fig_repl, text)
 
     def path_repl(m: re.Match) -> str:
         file = re.sub(r"\.(wmf|emf)$", ".png", m.group(1), flags=re.I)
@@ -290,7 +298,11 @@ def convert_chapter(chapter: Chapter) -> None:
                 shutil.copy(f, out_img_dir / f.name)
 
     text = raw_md
-    text = strip_references_section(text)
+    if chapter.references:
+        # These chapters' "References" section is a Word citation-manager
+        # table that pandoc mangles when +styles is enabled; drop it and
+        # substitute the pre-cleaned markdown version below instead.
+        text = strip_references_section(text)
     text = unwrap_style(text, "List Paragraph")
     text = inline_code_style(text, "q-relative")
     text = convert_code_divs(text)
